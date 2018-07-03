@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import StockAPIFactory as apiFactory
+from ANewDesign import StockAPIFactory as apiFactory
 import pandas as pd
 import re
 from Utilities.FileReader import FileReader as fr

@@ -1,4 +1,4 @@
-import StockAPICaller
+from ANewDesign.StockAPICaller import StockAPICaller
 import pandas as pd
 import requests
 import datetime

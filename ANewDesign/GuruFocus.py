@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import StockAPICaller
+from ANewDesign.StockAPICaller import StockAPICaller
 import pandas as pd
 import requests
 
