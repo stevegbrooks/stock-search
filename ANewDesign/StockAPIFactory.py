@@ -5,7 +5,7 @@ class StockAPIFactory:
     
     apiArgs = dict()
     
-    def __init__(self, apiArgs):
+    def getAPI(self, apiArgs):
         
         if apiArgs.__contains__("gurufocus"):
             credentials = apiArgs.get("gurufocus")

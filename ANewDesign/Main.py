@@ -14,5 +14,6 @@ ticker = "AAPL"
 
 ui.specifyAPI("gurufocus", gfKey)
 ui.specifyAPI("intrinio", intrinioKey)
+len(ui.stockAPICallers)
 
 ui.handleDataRequest(ticker)

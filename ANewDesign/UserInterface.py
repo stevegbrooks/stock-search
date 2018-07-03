@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from ANewDesign import StockAPIFactory as apiFactory
+from ANewDesign.Utilities.FileReader import FileReader as fr
 import pandas as pd
 import re
-from Utilities.FileReader import FileReader as fr
+
 
 class UserInterface:
 
@@ -14,7 +15,8 @@ class UserInterface:
     def specifyAPI(self, api, key):
         apiArgs = dict()
         apiArgs.__setitem__(api, key)
-        self.stockAPICallers.append(apiFactory.StockAPIFactory(apiArgs))
+        self.stockAPICallers.append(
+                apiFactory.StockAPIFactory.getAPI(apiFactory, apiArgs))
     
     def handleDataRequest(self, tickerInput):
         tickerInput = self.__parseTickerInput(tickerInput)

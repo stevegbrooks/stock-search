@@ -1,16 +1,15 @@
-from abc import ABC, abstractmethod
-
-class StockAPICaller(ABC):
+class StockAPICaller():
     
-    @abstractmethod
+    credentials = ''
+    apiParameters = ''
+    tickers = ''
+    
     def __init__(self, credentials):
         self.credentials = credentials
     
-    @abstractmethod
     def specifyDataRequest(self, apiParameters):
-        pass
+        self.apiParameters = apiParameters
     
-    @abstractmethod
     def getStockData(self, tickers):
-        pass
+        self.tickers = tickers
     

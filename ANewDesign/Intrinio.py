@@ -5,6 +5,7 @@ import datetime
 
 class Intrinio(StockAPICaller):
     base = "https://api.intrinio.com/"
+    apiParameters = ""
     endpoint = ""
     numOfResults = ""
     dataPoint = ""
@@ -12,10 +13,12 @@ class Intrinio(StockAPICaller):
     username = ""
     password = ""
     
-    def __init__(self, apiArgs):
-        super.__init__()
+    def __init__(self, credentials):
+        super().__init__(credentials)
+        self.credentials = credentials
     
     def specifyDataRequest(self, apiParameters):
+        self.apiParameters = apiParameters
         if apiParameters == "historical volume":
             self.endpoint = "historical_data"
             self.numOfResults = 150
