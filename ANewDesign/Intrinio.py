@@ -1,30 +1,27 @@
-from ANewDesign.StockAPICaller import StockAPICaller
 import pandas as pd
 import requests
 import datetime
+from ANewDesign.StockAPICaller import StockAPICaller
 
 class Intrinio(StockAPICaller):
-    base = "https://api.intrinio.com/"
-    apiParameters = ""
+    baseURL = ""
     endpoint = ""
     numOfResults = ""
     dataPoint = ""
-    
-    username = ""
-    password = ""
-    
+        
     def __init__(self, credentials):
         super().__init__(credentials)
         self.credentials = credentials
     
     def specifyDataRequest(self, apiParameters):
-        self.apiParameters = apiParameters
         if apiParameters == "historical volume":
             self.endpoint = "historical_data"
-            self.numOfResults = 150
+            self.numOfResults = "150"
             self.dataPoint = "volume"
         else:
             raise Exception("Only historical volume calls from Intrinio currently supported")
+        
+        self.baseURL = "https://api.intrinio.com/"
     
     def getStockData(self, tickers):
         
@@ -40,25 +37,27 @@ class Intrinio(StockAPICaller):
         
         startDate = endDate - datetime.timedelta(days = 155)
         
+        stockSymbol = []
         avgVolume = []
         
-        for index in tickers:
-            sequence = (self.base, self.endpoint, "?", "page_size=", 
-                        self.numOfResults, "&ticker=", index, "&item=", 
+        for ticker in tickers:
+            stockSymbol.append(ticker)
+            sequence = (self.baseURL, self.endpoint, "?", "page_size=", 
+                        self.numOfResults, "&ticker=", ticker, "&item=", 
                         self.dataPoint, "&start_date=", 
                         startDate.isoformat()[:10], "&end_date=", 
                         endDate.isoformat()[:10])
             url = "".join(sequence)
-            response = requests.get(url, auth = (self.username,
-                                                 self.password))
-            if response.status_code == 401: 
-                errorMessage = "Check your Intrinio username or password" 
+            response = requests.get(url, auth = (self.credentials[0],
+                                                 self.credentials[1]))
+            if response.status_code != 200: 
+                errorMessage = "Check your Intrinio username or password or URL address" 
                 raise Exception(errorMessage)
             
             volumeData = response.json()['data']
             
             if len(volumeData) == 0:
-                print("Unable to retrieve avg volume data from Intrinio for " + index)
+                print("Unable to retrieve avg volume data from Intrinio for " + ticker)
                 avgVolume.append(0)
             else:
                 totalVolume = 0
@@ -67,6 +66,7 @@ class Intrinio(StockAPICaller):
                 
                 avgVolume.append(round(totalVolume/len(volumeData)))
         
-        intrinioResults = pd.DataFrame({'avgVolume' : avgVolume})
+        intrinioResults = pd.DataFrame({'stockSymbol' : stockSymbol,
+                                        'avgVolume' : avgVolume})
         
         return intrinioResults

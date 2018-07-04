@@ -1,47 +1,47 @@
 # -*- coding: utf-8 -*-
-from ANewDesign.StockAPICaller import StockAPICaller
 import pandas as pd
 import requests
+from ANewDesign.StockAPICaller import StockAPICaller
 
 class GuruFocus(StockAPICaller):
-    apiKey = ""
-    baseURL = "https://api.gurufocus.com/public/user/"
-    endpoint = "summary"
     credentials = ""
-    apiParameters = ""
+    baseURL = ""
+    endpoint = ""
     
     def __init__(self, credentials):
         super().__init__(credentials)
         self.credentials = credentials
-
+        
     def specifyDataRequest(self, apiParameters):
         if apiParameters != "company data":
             raise Exception("Only basic company data from GuruFocus currently supported")
         else:
-            self.apiParameters = apiParameters
+            self.baseURL = "https://api.gurufocus.com/public/user/"
+            self.endpoint = "summary"
 
     def getStockData(self, tickers):
+        stockSymbol = []
         companyName = []
         lastVolume = []
         lastPrice = []
         percentChange = []
         outstandingShares = []
         
-        for index in tickers:
-            sequence = (self.base, self.apiKey, "/stock/", 
-                        index, "/", self.endpoint)
+        for ticker in tickers:
+            stockSymbol.append(ticker)
+            sequence = (self.baseURL, self.credentials, "/stock/", ticker, "/", self.endpoint)
             url = "".join(sequence)
             response = requests.get(url)
     
-            if response.status_code == 401: 
-                errorMessage = "Check your API key" 
+            if response.status_code != 200: 
+                errorMessage = "Check your GuruFocus API key, or URL address" 
                 raise Exception(errorMessage)
                 
             summary = response.json()['summary']
             self.companyData = summary['company_data']
             
             if len(self.companyData) <= 2:
-                print("Unable to retrieve company data from GuruFocus for " + index)
+                print("Unable to retrieve company data from GuruFocus for " + ticker)
                 companyName.append("")
                 lastVolume.append(0)
                 lastPrice.append(0)
@@ -54,11 +54,11 @@ class GuruFocus(StockAPICaller):
                 percentChange.append(float(self.companyData['p_pct_change']))
                 outstandingShares.append(int(float(self.companyData['shares']) * 1000000))
             
-        guruFocusResults = pd.DataFrame({'companyName' : companyName,
-                                         'lastVolume' : lastVolume, 
-                                        'lastPrice' : lastPrice,
-                                        'percentChange' : percentChange,
-                                        'outstandingShares' : outstandingShares})
+        guruFocusResults = pd.DataFrame({'stockSymbol' : stockSymbol,
+                                         'companyName' : companyName,
+                                         'lastVolume' : lastVolume,
+                                         'lastPrice' : lastPrice,
+                                         'percentChange' : percentChange,
+                                         'outstandingShares' : outstandingShares})
+        
         return guruFocusResults
-
-

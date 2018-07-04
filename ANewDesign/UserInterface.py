@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-from ANewDesign import StockAPIFactory as apiFactory
-from ANewDesign.Utilities.FileReader import FileReader as fr
 import pandas as pd
 import re
-
+from ANewDesign import StockAPIFactory as apiFactory
+from ANewDesign.Utilities.FileReader import FileReader as fr
 
 class UserInterface:
 
     stockAPICallers = []
     
     def __init__(self):
-        pass
+        self.stockAPICallers = []
     
     def specifyAPI(self, api, key):
         apiArgs = dict()
@@ -20,13 +19,13 @@ class UserInterface:
     
     def handleDataRequest(self, tickerInput):
         tickerInput = self.__parseTickerInput(tickerInput)
-        
         stockData = pd.DataFrame()
-        
         for caller in self.stockAPICallers:
             results = caller.getStockData(tickerInput)
-            pd.concat(stockData, results)
-        
+            if len(stockData != 0):
+                stockData = pd.merge(stockData, results, on = "stockSymbol", how = "left")
+            else:
+                stockData = results
         return stockData
     
     def __parseTickerInput(self, userInput):
