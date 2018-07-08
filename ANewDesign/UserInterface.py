@@ -3,6 +3,7 @@ import pandas as pd
 import re
 from ANewDesign import StockAPIFactory as apiFactory
 from ANewDesign.Utilities.FileReader import FileReader as fr
+from ANewDesign.Utilities.FileWriter import FileWriter as fw
 
 class UserInterface:
 
@@ -11,21 +12,30 @@ class UserInterface:
     def __init__(self):
         self.stockAPICallers = []
     
-    def specifyAPI(self, api, key):
+    def specifyAPI(self, api, key, dataRequest):
         apiArgs = dict()
         apiArgs.__setitem__(api, key)
         self.stockAPICallers.append(
-                apiFactory.StockAPIFactory.getAPI(apiFactory, apiArgs))
+                apiFactory.StockAPIFactory.getAPI(apiFactory, 
+                                                  apiArgs, 
+                                                  dataRequest))
     
-    def handleDataRequest(self, tickerInput):
+    def researchStocks(self, tickerInput):
         tickerInput = self.__parseTickerInput(tickerInput)
         stockData = pd.DataFrame()
+        
         for caller in self.stockAPICallers:
             results = caller.getStockData(tickerInput)
             if len(stockData != 0):
-                stockData = pd.merge(stockData, results, on = "stockSymbol", how = "left")
+                stockData = pd.merge(stockData, 
+                                     results, 
+                                     on = "stockSymbol", 
+                                     how = "left")
             else:
                 stockData = results
+        symbolCol = stockData['stockSymbol']
+        stockData.drop(labels = ['stockSymbol'], axis = 1, inplace = True)
+        stockData.insert(0, 'stockSymbol', symbolCol)
         return stockData
     
     def __parseTickerInput(self, userInput):
@@ -42,4 +52,5 @@ class UserInterface:
             output.append(userInput)
         
         return output
+    
 

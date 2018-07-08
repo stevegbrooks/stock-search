@@ -4,23 +4,25 @@ import datetime
 from ANewDesign.StockAPICaller import StockAPICaller
 
 class Intrinio(StockAPICaller):
+    credentials = ""
     baseURL = ""
     endpoint = ""
     numOfResults = ""
     dataPoint = ""
         
-    def __init__(self, credentials):
-        super().__init__(credentials)
+    def __init__(self, credentials, dataRequest):
+        super().__init__(credentials, dataRequest)
         self.credentials = credentials
+        self.__analyzeRequest(dataRequest)
     
-    def specifyDataRequest(self, apiParameters):
-        if apiParameters == "historical volume":
+    def __analyzeRequest(self, dataRequest):
+        if dataRequest != "historical volume":
+            raise Exception("Only historical volume calls from Intrinio currently supported")
+        else:
             self.endpoint = "historical_data"
             self.numOfResults = "150"
             self.dataPoint = "volume"
-        else:
-            raise Exception("Only historical volume calls from Intrinio currently supported")
-        
+            
         self.baseURL = "https://api.intrinio.com/"
     
     def getStockData(self, tickers):

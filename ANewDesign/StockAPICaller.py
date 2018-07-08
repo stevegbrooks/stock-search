@@ -1,14 +1,13 @@
 class StockAPICaller():
-    baseURL = ''
     credentials = ''
-    apiParameters = ''
     tickers = ''
     
-    def __init__(self, credentials):
+    def __init__(self, credentials, dataRequest):
         self.credentials = credentials
+        self.__analyzeRequest(dataRequest)
     
-    def specifyDataRequest(self, apiParameters):
-        self.apiParameters = apiParameters
+    def __analyzeRequest(self, dataRequest):
+        pass
     
     def getStockData(self, tickers):
         self.tickers = tickers

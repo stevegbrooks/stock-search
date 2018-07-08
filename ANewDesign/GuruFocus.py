@@ -8,13 +8,14 @@ class GuruFocus(StockAPICaller):
     baseURL = ""
     endpoint = ""
     
-    def __init__(self, credentials):
-        super().__init__(credentials)
+    def __init__(self, credentials, dataRequest):
+        super().__init__(credentials, dataRequest)
         self.credentials = credentials
+        self.__analyzeRequest(dataRequest)
         
-    def specifyDataRequest(self, apiParameters):
-        if apiParameters != "company data":
-            raise Exception("Only basic company data from GuruFocus currently supported")
+    def __analyzeRequest(self, dataRequest):
+        if dataRequest != "company data":
+            raise Exception("Only basic company data from GuruFocus are currently supported")
         else:
             self.baseURL = "https://api.gurufocus.com/public/user/"
             self.endpoint = "summary"
