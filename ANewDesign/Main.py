@@ -9,13 +9,24 @@ intrinioUN = "14434456068d3aa67d6d01703c377c5b"
 intrinioPW = "d51918023463341a24d85d8e263f3403"
 intrinioKey = [intrinioUN, intrinioPW]
 
-ui.specifyAPI("gurufocus", gfKey, "company data")
-ui.specifyAPI("intrinio", intrinioKey, "historical volume")
+ui.specifyAPI("gurufocus", gfKey, 
+              dataRequest = {"endpoint" : "summary"})
 
-ticker = "AAPL"
-stockData = ui.researchStocks(ticker)
+ui.specifyAPI("intrinio", intrinioKey, 
+              dataRequest = {"endpoint" : "historical_data", 
+                             "item" : "close_price",
+                             "end_date" : "2018-05-01",
+                             "start_date" : "2018-05-01"})
 
-desiredColumnOrder = ['stockSymbol', 'companyName', 'lastPrice', 'lastVolume', 
-                      'outstandingShares', 'avgVolume', 'percentChange']
+ui.specifyAPI("intrinio", intrinioKey, 
+              dataRequest = {"endpoint" : "historical_data", 
+                             "item" : "volume"})
 
-stockData = stockData[desiredColumnOrder]
+
+tickers = "AAPL"
+stockData = ui.researchStocks(tickers)
+
+headerList = stockData.columns.tolist()
+
+stockData = stockData.loc[:,:]
+

@@ -33,8 +33,11 @@ class UserInterface:
                                      how = "left")
             else:
                 stockData = results
+        
         symbolCol = stockData['stockSymbol']
-        stockData.drop(labels = ['stockSymbol'], axis = 1, inplace = True)
+        stockData.drop(labels = ['stockSymbol'], 
+                       axis = 1, 
+                       inplace = True)
         stockData.insert(0, 'stockSymbol', symbolCol)
         return stockData
     

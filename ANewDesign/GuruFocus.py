@@ -5,7 +5,7 @@ from ANewDesign.StockAPICaller import StockAPICaller
 
 class GuruFocus(StockAPICaller):
     credentials = ""
-    baseURL = ""
+    baseURL = "https://api.gurufocus.com/public/user/"
     endpoint = ""
     
     def __init__(self, credentials, dataRequest):
@@ -14,11 +14,10 @@ class GuruFocus(StockAPICaller):
         self.__analyzeRequest(dataRequest)
         
     def __analyzeRequest(self, dataRequest):
-        if dataRequest != "company data":
-            raise Exception("Only basic company data from GuruFocus are currently supported")
+        if dataRequest.get("endpoint") != "summary":
+            raise Exception("Only the company summary data from GuruFocus are currently supported")
         else:
-            self.baseURL = "https://api.gurufocus.com/public/user/"
-            self.endpoint = "summary"
+            self.endpoint = dataRequest.get("endpoint")
 
     def getStockData(self, tickers):
         stockSymbol = []

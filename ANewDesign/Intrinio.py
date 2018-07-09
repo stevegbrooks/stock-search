@@ -1,14 +1,16 @@
 import pandas as pd
 import requests
-import datetime
+from datetime import datetime, timedelta, date
 from ANewDesign.StockAPICaller import StockAPICaller
 
 class Intrinio(StockAPICaller):
     credentials = ""
-    baseURL = ""
+    baseURL = "https://api.intrinio.com/"
+    numOfResults = "150"
     endpoint = ""
-    numOfResults = ""
-    dataPoint = ""
+    item = ""
+    end_date = ""
+    start_date = ""
         
     def __init__(self, credentials, dataRequest):
         super().__init__(credentials, dataRequest)
@@ -16,39 +18,57 @@ class Intrinio(StockAPICaller):
         self.__analyzeRequest(dataRequest)
     
     def __analyzeRequest(self, dataRequest):
-        if dataRequest != "historical volume":
-            raise Exception("Only historical volume calls from Intrinio currently supported")
+        if dataRequest.get("endpoint") != "historical_data":
+            raise Exception("Only historical data from Intrinio currently supported")
         else:
-            self.endpoint = "historical_data"
-            self.numOfResults = "150"
-            self.dataPoint = "volume"
-            
-        self.baseURL = "https://api.intrinio.com/"
+            self.endpoint = dataRequest.get("endpoint")
+            self.item = dataRequest.get("item")
+            if self.endpoint == 'historical_data':
+                if "end_date" in dataRequest:
+                    self.end_date = dataRequest.get('end_date')
+                else:
+                    self.end_date = ""
+                if "start_date" in dataRequest:
+                    self.start_date = dataRequest.get('start_date')
+                else:
+                    self.start_date = ""
+    
+    def __determineStartDate(self):
+        if len(self.start_date) == 0:
+            self.start_date = self.end_date - timedelta(days = 155)
+        else:
+            self.start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
+    
+    def __determineEndDate(self):
+        if len(self.end_date) == 0:
+            self.end_date = date.today()
+        else:
+            self.end_date = datetime.strptime(self.end_date, '%Y-%m-%d')
+        
+        if self.item == "volume":
+            dayOfWeek = self.end_date.weekday()
+            if dayOfWeek < 5:#mon-fri
+                self.end_date = self.end_date - timedelta(days = 1)
+            elif dayOfWeek == 5:#sat
+                self.end_date = self.end_date - timedelta(days = 2)
+            elif dayOfWeek == 6:#sun
+                self.end_date = self.end_date - timedelta(days = 3)
     
     def getStockData(self, tickers):
         
-        today = datetime.date.today()
-        dayOfWeekOfToday = datetime.date.today().weekday()
-        
-        if dayOfWeekOfToday < 5:
-          endDate = today - datetime.timedelta(days = 1)
-        elif dayOfWeekOfToday == 5:
-          endDate = today - datetime.timedelta(days = 2)
-        elif dayOfWeekOfToday == 6:
-          endDate = today - datetime.timedelta(days = 3)
-        
-        startDate = endDate - datetime.timedelta(days = 155)
+        Intrinio.__determineEndDate(self)
+        Intrinio.__determineStartDate(self)
         
         stockSymbol = []
-        avgVolume = []
+        histData = []
         
         for ticker in tickers:
             stockSymbol.append(ticker)
             sequence = (self.baseURL, self.endpoint, "?", "page_size=", 
                         self.numOfResults, "&ticker=", ticker, "&item=", 
-                        self.dataPoint, "&start_date=", 
-                        startDate.isoformat()[:10], "&end_date=", 
-                        endDate.isoformat()[:10])
+                        self.item, "&start_date=", 
+                        self.start_date.isoformat()[:10], "&end_date=", 
+                        self.end_date.isoformat()[:10])
             url = "".join(sequence)
             response = requests.get(url, auth = (self.credentials[0],
                                                  self.credentials[1]))
@@ -56,19 +76,26 @@ class Intrinio(StockAPICaller):
                 errorMessage = "Check your Intrinio username or password or URL address" 
                 raise Exception(errorMessage)
             
-            volumeData = response.json()['data']
+            jsonData = response.json()['data']
             
-            if len(volumeData) == 0:
-                print("Unable to retrieve avg volume data from Intrinio for " + ticker)
-                avgVolume.append(0)
+            if len(jsonData) == 0:
+                print("Unable to retrieve historical", self.item, "data from Intrinio for " + ticker)
+                histData.append(0)
             else:
-                totalVolume = 0
-                for item in volumeData:
-                    totalVolume = totalVolume + item['value']
+                total = 0
+                for i in jsonData:
+                    total = total + i['value']
+                if self.item == "volume":
+                    histData.append(round(total/len(jsonData)))
+                else:
+                    histData.append(round(total/len(jsonData), 2))
                 
-                avgVolume.append(round(totalVolume/len(volumeData)))
+        colName = ['avg', self.item.capitalize(), "[", 
+                   self.end_date.isoformat()[:10], ":",
+                   self.start_date.isoformat()[:10], "]"]
+        colName = "".join(colName)
         
         intrinioResults = pd.DataFrame({'stockSymbol' : stockSymbol,
-                                        'avgVolume' : avgVolume})
+                                        colName : histData})
         
         return intrinioResults
