@@ -4,9 +4,9 @@ import requests
 from ANewDesign.StockAPICaller import StockAPICaller
 
 class GuruFocus(StockAPICaller):
-    credentials = ""
-    baseURL = "https://api.gurufocus.com/public/user/"
-    endpoint = ""
+    credentials = ''
+    baseURL = 'https://api.gurufocus.com/public/user/'
+    endpoint = ''
     
     def __init__(self, credentials, dataRequest):
         super().__init__(credentials, dataRequest)
@@ -14,10 +14,10 @@ class GuruFocus(StockAPICaller):
         self.__analyzeRequest(dataRequest)
         
     def __analyzeRequest(self, dataRequest):
-        if dataRequest.get("endpoint") != "summary":
-            raise Exception("Only the company summary data from GuruFocus are currently supported")
+        if dataRequest.get('endpoint') != 'summary':
+            raise Exception('Only the summary data from GuruFocus are currently supported')
         else:
-            self.endpoint = dataRequest.get("endpoint")
+            self.endpoint = dataRequest.get('endpoint')
 
     def getStockData(self, tickers):
         stockSymbol = []
@@ -29,20 +29,20 @@ class GuruFocus(StockAPICaller):
         
         for ticker in tickers:
             stockSymbol.append(ticker)
-            sequence = (self.baseURL, self.credentials, "/stock/", ticker, "/", self.endpoint)
-            url = "".join(sequence)
+            sequence = (self.baseURL, self.credentials, '/stock/', ticker, '/', self.endpoint)
+            url = ''.join(sequence)
             response = requests.get(url)
     
             if response.status_code != 200: 
-                errorMessage = "Check your GuruFocus API key, or URL address" 
+                errorMessage = 'Check your GuruFocus API key, or URL address' 
                 raise Exception(errorMessage)
                 
             summary = response.json()['summary']
             self.companyData = summary['company_data']
             
             if len(self.companyData) <= 2:
-                print("Unable to retrieve company data from GuruFocus for " + ticker)
-                companyName.append("")
+                print('Unable to retrieve company data from GuruFocus for ' + ticker)
+                companyName.append('')
                 lastVolume.append(0)
                 lastPrice.append(0)
                 percentChange.append(0)

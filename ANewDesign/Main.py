@@ -1,32 +1,30 @@
 # -*- coding: utf-8 -*-
+from ANewDesign.Secret import Secret
+from ANewDesign.UserInterface import UserInterface
 
-from ANewDesign.UserInterface import UserInterface 
-
+secret = Secret()
 ui = UserInterface()
 
-gfKey = "b0373bf00e2473ed61fa029e6777ddc4:98e3238704945ab068f05c902f5c4e09"
-intrinioUN = "14434456068d3aa67d6d01703c377c5b"
-intrinioPW = "d51918023463341a24d85d8e263f3403"
-intrinioKey = [intrinioUN, intrinioPW]
+gfKey = secret.getGFKey()
+intrinioKey = secret.getIntrinioKey()
 
-ui.specifyAPI("gurufocus", gfKey, 
-              dataRequest = {"endpoint" : "summary"})
+ui.specifyAPI('gurufocus', gfKey, 
+              dataRequest = {'endpoint' : 'summary'})
 
-ui.specifyAPI("intrinio", intrinioKey, 
-              dataRequest = {"endpoint" : "historical_data", 
-                             "item" : "close_price",
-                             "end_date" : "2018-05-01",
-                             "start_date" : "2018-05-01"})
+ui.specifyAPI('intrinio', intrinioKey, 
+              dataRequest = {'endpoint' : 'historical_data', 
+                             'item' : 'close_price',
+                             'date' : '2018-06-01'})
 
-ui.specifyAPI("intrinio", intrinioKey, 
-              dataRequest = {"endpoint" : "historical_data", 
-                             "item" : "volume"})
+ui.specifyAPI('intrinio', intrinioKey, 
+              dataRequest = {'endpoint' : 'historical_data', 
+                             'item' : 'volume',
+                             'end_date' : '2018-06-01'})
 
-
-tickers = "AAPL"
+tickers = 'testTickers.xlsx'
 stockData = ui.researchStocks(tickers)
 
-headerList = stockData.columns.tolist()
-
-stockData = stockData.loc[:,:]
-
+if ui.fileInput == True:
+    ui.writeToFile(stockData, 'testResults.xlsx')
+else:
+    print(stockData.loc[0])
