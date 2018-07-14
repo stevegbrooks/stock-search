@@ -1,54 +1,67 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import re
+from datetime import datetime
 from ANewDesign import StockAPIFactory as apiFactory
+from ANewDesign.Secret import Secret
 from ANewDesign.Utilities.FileReader import FileReader as fr
 from ANewDesign.Utilities.FileWriter import FileWriter as fw
 from ANewDesign.Utilities.Calculator import Calculator as calc
 
 class UserInterface:
     
-    stockAPICallers = []
+    stockAPICallers = dict()
     fileInput = False
+    isHistorical = False
+    userSpecifiedDate = ''
     avgVolColName = ''
-    histPriceColName = ''
+    secret = Secret()
     
     def __init__(self):
-        self.stockAPICallers = []
+        self.stockAPICallers = dict()
+        self.secret = Secret()
     
     def specifyAPI(self, api, key, dataRequest):
         apiArgs = dict()
-        apiArgs.__setitem__(api, key)
-        self.stockAPICallers.append(
-                apiFactory.StockAPIFactory.getAPI(apiFactory, 
-                                                  apiArgs, 
-                                                  dataRequest))
+        apiArgs[api] = key
+        self.stockAPICallers[api] = apiFactory.StockAPIFactory.getAPI(apiFactory, apiArgs, dataRequest)
     
     def researchStocks(self, tickerInput):
         tickerInput = self.__parseTickerInput(tickerInput)
         stockData = pd.DataFrame()
         
-        for caller in self.stockAPICallers:
-            results = caller.getStockData(tickerInput)
-            if len(stockData != 0):
-                stockData = pd.merge(stockData, 
-                                     results, 
-                                     on = 'stockSymbol', 
-                                     how = 'left')
-            else:
-                stockData = results
-        
-        symbolCol = stockData['stockSymbol']
-        stockData.drop(labels = ['stockSymbol'], 
-                       axis = 1, 
-                       inplace = True)
-        stockData.insert(0, 'stockSymbol', symbolCol)
-        
-        
+        if self.isHistorical == False:
+            stockData = self.callAPIs(tickerInput)
+        else:
+            self.userSpecifiedDate = self.getDateFromUser()
+            self.stockAPICallers.clear()
+            apiArgs = dict()
+            intrinioKey = self.secret.getIntrinioKey()
+            apiArgs['intrinio'] = intrinioKey
+            histModeRequests = dict()
+            histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'volume'}
+            histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'weightedavebasicsharesos'}
+            histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'close_price'}
+            self.stockAPICallers[len(self.stockAPICallers)] = apiFactory.StockAPIFactory.getAPI(apiFactory, apiArgs, )
+            
+                
         self.identifyColNames(stockData)        
         stockData = self.calcNewColumns(stockData)
         stockData = self.reindexColumns(stockData)
         return self.renameColumns(stockData)
+    
+    def callAPIs(self, tickerInput):
+        stockData = pd.DataFrame()
+        for caller in self.stockAPICallers:
+                results = self.stockAPICallers[caller].getStockData(tickerInput)
+                if len(stockData != 0):
+                    stockData = pd.merge(stockData, 
+                                         results, 
+                                         on = 'stockSymbol', 
+                                         how = 'left')
+                else:
+                    stockData = results
+        return stockData
     
     def calcNewColumns(self, dataFrame):
         dataFrame['peadScore'] = dataFrame.apply(
@@ -103,8 +116,6 @@ class UserInterface:
         colNames = dataFrame.columns.tolist()
         r = re.compile("(avgVolume[\\w\\W]*)")
         self.avgVolColName = list(filter(r.match, colNames))[0]
-        r = re.compile("(close_price[\\w\\W]*)")
-        self.histPriceColName = list(filter(r.match, colNames))[0]
     
     def writeToFile(self, dataFrame, fileName):
         match = re.search('\\.[a-zA-Z]*$', fileName, flags = 0)
@@ -131,5 +142,17 @@ class UserInterface:
             output.append(userInput)
         
         return output
+    
+    def getDateFromUser(self):
+        switch = 1
+        while switch == 1:
+            date = input('Input a date as YYYY-MM-DD\n' 
+                     + '--------------------------\n')
+            try:
+                date = datetime.strptime(date, '%Y-%m-%d')
+                switch = 0
+            except ValueError:
+                print('Unrecognized date format, please try again\n')
+        return date
     
 

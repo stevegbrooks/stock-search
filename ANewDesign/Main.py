@@ -8,20 +8,12 @@ ui = UserInterface()
 gfKey = secret.getGFKey()
 intrinioKey = secret.getIntrinioKey()
 
-ui.specifyAPI('gurufocus', gfKey, 
-              dataRequest = {'endpoint' : 'summary'})
+ui.isHistorical = False
+ui.specifyAPI('gurufocus', gfKey, dataRequest = {'endpoint' : 'summary'})
+ui.specifyAPI('intrinio', intrinioKey, dataRequest = {'endpoint' : 'historical_data', 
+                                                      'item' : 'volume'})
 
-ui.specifyAPI('intrinio', intrinioKey, 
-              dataRequest = {'endpoint' : 'historical_data', 
-                             'item' : 'close_price',
-                             'date' : '2018-06-01'})
-
-ui.specifyAPI('intrinio', intrinioKey, 
-              dataRequest = {'endpoint' : 'historical_data', 
-                             'item' : 'volume',
-                             'end_date' : '2018-06-01'})
-
-tickers = 'testTickers.xlsx'
+tickers = 'AAPL'
 stockData = ui.researchStocks(tickers)
 
 if ui.fileInput == True:
