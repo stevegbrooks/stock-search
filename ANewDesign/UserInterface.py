@@ -4,33 +4,39 @@ import re
 from datetime import datetime
 from ANewDesign import StockAPIFactory as apiFactory
 from ANewDesign.Secret import Secret
+from ANewDesign.Utilities.DateAdjuster import DateAdjuster
 from ANewDesign.Utilities.FileReader import FileReader as fr
 from ANewDesign.Utilities.FileWriter import FileWriter as fw
 from ANewDesign.Utilities.Calculator import Calculator as calc
+
 
 class UserInterface:
     
     stockAPICallers = dict()
     fileInput = False
-    isHistorical = False
+    isHistoricalMode = False
+    trailingDays = 155
     userSpecifiedDate = ''
     avgVolColName = ''
     secret = Secret()
+    dateAdjuster = DateAdjuster()
     
     def __init__(self):
         self.stockAPICallers = dict()
         self.secret = Secret()
+        self.dateAdjuster = DateAdjuster()
     
     def specifyAPI(self, api, key, dataRequest):
         apiArgs = dict()
         apiArgs[api] = key
+        dataRequest = self.validateDataRequest(api, dataRequest)
         self.stockAPICallers[api] = apiFactory.StockAPIFactory.getAPI(apiFactory, apiArgs, dataRequest)
     
     def researchStocks(self, tickerInput):
         tickerInput = self.__parseTickerInput(tickerInput)
         stockData = pd.DataFrame()
         
-        if self.isHistorical == False:
+        if self.isHistoricalMode == False:
             stockData = self.callAPIs(tickerInput)
         else:
             self.userSpecifiedDate = self.getDateFromUser()
@@ -39,11 +45,11 @@ class UserInterface:
             intrinioKey = self.secret.getIntrinioKey()
             apiArgs['intrinio'] = intrinioKey
             histModeRequests = dict()
+            #TODO - figure out how to handle 'historical mode'
             histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'volume'}
             histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'weightedavebasicsharesos'}
             histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'close_price'}
             self.stockAPICallers[len(self.stockAPICallers)] = apiFactory.StockAPIFactory.getAPI(apiFactory, apiArgs, )
-            
                 
         self.identifyColNames(stockData)        
         stockData = self.calcNewColumns(stockData)
@@ -155,4 +161,32 @@ class UserInterface:
                 print('Unrecognized date format, please try again\n')
         return date
     
+    def validateDataRequest(self, api, dataRequest):
+        if 'endpoint' not in dataRequest:
+            raise Exception('You must provide an endpoint!')
+        elif 'item' not in dataRequest and api == 'intrinio':
+            raise Exception('You must provide an item when you call the Intrinio API!')
+        else:
+            if dataRequest['endpoint'] == 'historical_data':
+                if 'start_date' in dataRequest and 'end_date' not in dataRequest:
+                    raise Exception('If you provide a start_date, then you must also provide an end_date!')
+                elif 'end_date' in dataRequest and 'start_date' not in dataRequest:
+                    dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                            dataRequest['end_date'], 
+                            dataRequest['item']
+                            )
+                elif 'end_date' not in dataRequest and 'start_date' not in dataRequest:
+                    dataRequest['end_date'] = self.dateAdjuster.defineEndDate(dataRequest['item'])
+       
+                dataRequest['start_date'] = self.dateAdjuster.defineStartDate(dataRequest['end_date'])
+            
+            elif dataRequest['endpoint'] == 'data_point':
+                if 'end_date' in dataRequest or 'start_date' in dataRequest:
+                    raise Exception("The 'data_point' endpoint does not take in dates" + 
+                                    " - it provides current data!")
+        
+        return dataRequest
+
+        
+        
 

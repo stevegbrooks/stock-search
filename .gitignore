@@ -10,6 +10,7 @@ __pycache__/
 Secret.py
 *.xlsx
 *.csv
+*.txt
 
 # Distribution / packaging
 .Python

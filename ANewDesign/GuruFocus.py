@@ -11,14 +11,8 @@ class GuruFocus(StockAPICaller):
     def __init__(self, credentials, dataRequest):
         super().__init__(credentials, dataRequest)
         self.credentials = credentials
-        self.__analyzeRequest(dataRequest)
+        self.endpoint = dataRequest['endpoint']
         
-    def __analyzeRequest(self, dataRequest):
-        if dataRequest.get('endpoint') != 'summary':
-            raise Exception('Only the summary data from GuruFocus are currently supported')
-        else:
-            self.endpoint = dataRequest.get('endpoint')
-
     def getStockData(self, tickers):
         stockSymbol = []
         companyName = []
