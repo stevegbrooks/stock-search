@@ -2,12 +2,12 @@
 import pandas as pd
 import re
 from datetime import datetime
-from ANewDesign import StockAPIFactory as apiFactory
-from ANewDesign.Secret import Secret
-from ANewDesign.Utilities.DateAdjuster import DateAdjuster
-from ANewDesign.Utilities.FileReader import FileReader as fr
-from ANewDesign.Utilities.FileWriter import FileWriter as fw
-from ANewDesign.Utilities.Calculator import Calculator as calc
+from StockAPICaller import StockAPIFactory as apiFactory
+from Secret import Secret
+from Utilities.DateAdjuster import DateAdjuster
+from Utilities.FileReader import FileReader as fr
+from Utilities.FileWriter import FileWriter as fw
+from Utilities.Calculator import Calculator as calc
 
 
 class UserInterface:

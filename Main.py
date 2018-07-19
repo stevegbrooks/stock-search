@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from ANewDesign.Secret import Secret
-from ANewDesign.UserInterface import UserInterface
+from Secret import Secret
+from UserInterface import UserInterface
 
 secret = Secret()
 ui = UserInterface()

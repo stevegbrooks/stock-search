@@ -1,6 +1,6 @@
-from ANewDesign.GuruFocus import GuruFocus
-from ANewDesign.IntrinioHistorical import IntrinioHistorical
-from ANewDesign.Intrinio import Intrinio
+from GuruFocus import GuruFocus
+from IntrinioHistorical import IntrinioHistorical
+from Intrinio import Intrinio
 
 class StockAPIFactory:
     

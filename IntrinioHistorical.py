@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from ANewDesign.StockAPICaller import StockAPICaller
+from StockAPICaller import StockAPICaller
 
 class IntrinioHistorical(StockAPICaller):
     dataRequest = dict()
