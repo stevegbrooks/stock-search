@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import requests
-from ANewDesign.StockAPICaller import StockAPICaller
+from StockAPICaller import StockAPICaller
 
 class GuruFocus(StockAPICaller):
     credentials = ''
@@ -49,7 +49,7 @@ class GuruFocus(StockAPICaller):
                 outstandingShares.append(int(float(self.companyData['shares']) * 1000000))
             
         guruFocusResults = pd.DataFrame({'stockSymbol' : stockSymbol,
-                                         'companyName' : companyName,
+                                         'name' : companyName,
                                          'lastVolume' : lastVolume,
                                          'lastPrice' : lastPrice,
                                          'percentChange' : percentChange,

@@ -9,11 +9,10 @@ from datetime import datetime, timedelta, date
 
 class DateAdjuster:
     
-    def adjustForDayOfWeek(self, date, item, needToConvert = True):
-        dayOfWeek = date.weekday()
-        if needToConvert:
+    def adjustForDayOfWeek(self, date, item):
+        if type(date) == str:
             date = self.convertToDate(date)
-            
+        dayOfWeek = date.weekday()
         if item == 'volume':
             if dayOfWeek < 5:#mon-fri
                 date = date - timedelta(days = 1)
@@ -31,7 +30,7 @@ class DateAdjuster:
     
     def defineEndDate(self, item):
         end_date = date.today()
-        return self.adjustForDayOfWeek(end_date, item, needToConvert = False)
+        return self.adjustForDayOfWeek(end_date, item)
         
     
     def convertToDate(self, dateString):

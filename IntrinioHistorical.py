@@ -9,7 +9,7 @@ class IntrinioHistorical(StockAPICaller):
     end_date = ''
     start_date = ''
     baseURL = 'https://api.intrinio.com/'
-    numOfResults = '15000'
+    numOfResults = '150'
     endpoint = 'historical_data'    
         
     def __init__(self, credentials, dataRequest):
@@ -21,6 +21,9 @@ class IntrinioHistorical(StockAPICaller):
         self.item = self.dataRequest['item']
         self.end_date = self.dataRequest['end_date']
         self.start_date = self.dataRequest['start_date']
+        
+        if self.end_date == self.start_date:
+            self.numOfResults = '1'
         
         stockSymbol = []
         histData = []

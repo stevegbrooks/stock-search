@@ -45,3 +45,8 @@ class Calculator:
             return round(numerator/denominator, 2)
         else:
             return 0
+    
+    def getPercentChange(closePrice1, closePrice2):
+        diff = closePrice1 - closePrice2
+        change = diff/closePrice2 * 100
+        return round(change, 2)

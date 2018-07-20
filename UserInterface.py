@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import re
-from datetime import datetime
-from StockAPICaller import StockAPIFactory as apiFactory
+from datetime import datetime, timedelta
+from StockAPIFactory import StockAPIFactory as apiFactory
 from Secret import Secret
 from Utilities.DateAdjuster import DateAdjuster
 from Utilities.FileReader import FileReader as fr
 from Utilities.FileWriter import FileWriter as fw
 from Utilities.Calculator import Calculator as calc
-
 
 class UserInterface:
     
@@ -18,6 +17,9 @@ class UserInterface:
     trailingDays = 155
     userSpecifiedDate = ''
     avgVolColName = ''
+    lastVolColName = ''
+    closePriceColName1 = ''
+    closePriceColName2 = ''
     secret = Secret()
     dateAdjuster = DateAdjuster()
     
@@ -25,12 +27,16 @@ class UserInterface:
         self.stockAPICallers = dict()
         self.secret = Secret()
         self.dateAdjuster = DateAdjuster()
-    
+        gfKey = self.secret.getGFKey()
+        intrinioKey = self.secret.getIntrinioKey()
+        self.specifyAPI('gurufocus', gfKey, dataRequest = {'endpoint' : 'summary'})
+        self.specifyAPI('intrinio', intrinioKey, dataRequest = {'endpoint' : 'historical_data', 
+                                                                'item' : 'volume'})
     def specifyAPI(self, api, key, dataRequest):
         apiArgs = dict()
         apiArgs[api] = key
         dataRequest = self.validateDataRequest(api, dataRequest)
-        self.stockAPICallers[api] = apiFactory.StockAPIFactory.getAPI(apiFactory, apiArgs, dataRequest)
+        self.stockAPICallers[len(self.stockAPICallers)] = apiFactory.getAPI(apiFactory, apiArgs, dataRequest)
     
     def researchStocks(self, tickerInput):
         tickerInput = self.__parseTickerInput(tickerInput)
@@ -40,16 +46,39 @@ class UserInterface:
             stockData = self.callAPIs(tickerInput)
         else:
             self.userSpecifiedDate = self.getDateFromUser()
+            dayBefore = self.userSpecifiedDate - timedelta(days = 1)
+            dayBeforeAsString = datetime.strftime(dayBefore, '%Y-%m-%d')
+            dateAsString = datetime.strftime(self.userSpecifiedDate, '%Y-%m-%d')
+            
             self.stockAPICallers.clear()
             apiArgs = dict()
             intrinioKey = self.secret.getIntrinioKey()
             apiArgs['intrinio'] = intrinioKey
+           
             histModeRequests = dict()
-            #TODO - figure out how to handle 'historical mode'
-            histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'volume'}
-            histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'weightedavebasicsharesos'}
-            histModeRequests[len(histModeRequests)] = {'endpoint' : 'historical_data', 'item' : 'close_price'}
-            self.stockAPICallers[len(self.stockAPICallers)] = apiFactory.StockAPIFactory.getAPI(apiFactory, apiArgs, )
+            histModeRequests['avgVolume'] = {'endpoint' : 'historical_data', 
+                            'item' : 'volume', 
+                            'end_date' : dateAsString}
+            histModeRequests['outstandingShares'] = {'endpoint' : 'data_point', 
+                            'item' : 'weightedavebasicsharesos'}
+            histModeRequests['name'] = {'endpoint' : 'data_point', 
+                            'item' : 'name'}
+            histModeRequests['lastPrice'] = {'endpoint' : 'historical_data', 
+                            'item' : 'close_price',
+                            'end_date' : dateAsString,
+                            'start_date' : dateAsString}
+            histModeRequests['lastPriceDayBefore'] = {'endpoint' : 'historical_data', 
+                            'item' : 'close_price',
+                            'end_date' : dayBeforeAsString,
+                            'start_date' : dayBeforeAsString}
+            histModeRequests['lastVolume'] = {'endpoint' : 'historical_data', 
+                            'item' : 'volume',
+                            'end_date' : dateAsString,
+                            'start_date' : dateAsString}
+            for request in histModeRequests:
+                self.specifyAPI('intrinio', intrinioKey, histModeRequests.get(request))
+            
+            stockData = self.callAPIs(tickerInput)
                 
         self.identifyColNames(stockData)        
         stockData = self.calcNewColumns(stockData)
@@ -70,6 +99,16 @@ class UserInterface:
         return stockData
     
     def calcNewColumns(self, dataFrame):
+        if self.isHistoricalMode:
+            dataFrame['lastPrice'] = dataFrame[self.closePriceColName1]
+            dataFrame['percentChange'] = dataFrame.apply(
+                    lambda row: calc.getPercentChange(row[self.closePriceColName1],
+                                                      row[self.closePriceColName2]),
+                                                      axis = 1)
+            dataFrame['lastVolume'] = dataFrame[self.lastVolColName]
+            dataFrame.drop(columns = [self.closePriceColName1,
+                                      self.closePriceColName2,
+                                      self.lastVolColName], inplace = True)
         dataFrame['peadScore'] = dataFrame.apply(
                 lambda row: calc.PEAD(row[self.avgVolColName], 
                                       row['outstandingShares']), 
@@ -83,7 +122,8 @@ class UserInterface:
                                            row['lastVolume']), 
                                            axis = 1)
         dataFrame['volOverMC'] = dataFrame.apply(
-                lambda row: calc.volOverMC(row['lastVolume'], row['lastPrice'], 
+                lambda row: calc.volOverMC(row['lastVolume'], 
+                                           row['lastPrice'], 
                                            row['outstandingShares']),
                                            axis = 1)
         dataFrame['moveStrength'] = dataFrame.apply(
@@ -94,18 +134,8 @@ class UserInterface:
                                               axis = 1)
         return dataFrame 
         
-    def renameColumns(self, dataFrame):
-        dataFrame = dataFrame.rename(index = int, 
-                                     columns = {"marketCap" : "marketCap(M)", 
-                                                "lastVolume" : "lastVolume(delayed)", 
-                                                "dollarVolume" : "dollarVolume(M)", 
-                                                "volOverMC" : "dollarVol/MC(%)", 
-                                                "lastPrice" : "lastPrice(delayed)",
-                                                "peadScore" : "PEAD"})
-        return dataFrame
-    
     def reindexColumns(self, dataFrame):
-        newDataFrame = dataFrame.reindex(['stockSymbol', 'companyName', 'marketCap',
+        newDataFrame = dataFrame.reindex(['stockSymbol', 'name', 'marketCap',
                                        'lastPrice', 'peadScore', 'percentChange',
                                        'dollarVolume', 'moveStrength', 'volOverMC',
                                        '', '', '', '', 'outstandingShares', '',
@@ -118,10 +148,28 @@ class UserInterface:
         
         return dataFrame
     
+    def renameColumns(self, dataFrame):
+        dataFrame = dataFrame.rename(index = int, 
+                                     columns = {"marketCap" : "marketCap(M)", 
+                                                "lastVolume" : "lastVolume(delayed)", 
+                                                "dollarVolume" : "dollarVolume(M)", 
+                                                "volOverMC" : "dollarVol/MC(%)", 
+                                                "lastPrice" : "lastPrice(delayed)",
+                                                "peadScore" : "PEAD"})
+        return dataFrame
+    
+    
+    
     def identifyColNames(self, dataFrame):
         colNames = dataFrame.columns.tolist()
         r = re.compile("(avgVolume[\\w\\W]*)")
         self.avgVolColName = list(filter(r.match, colNames))[0]
+        if self.isHistoricalMode:
+            r = re.compile("([\\w\\W]*close_price[\\w\\W]*)")
+            self.closePriceColName1 = list(filter(r.match, colNames))[0]
+            self.closePriceColName2 = list(filter(r.match, colNames))[1]
+            r = re.compile("(volume[\\w\\W]*)")
+            self.lastVolColName = list(filter(r.match, colNames))[0]
     
     def writeToFile(self, dataFrame, fileName):
         match = re.search('\\.[a-zA-Z]*$', fileName, flags = 0)
@@ -169,17 +217,19 @@ class UserInterface:
         else:
             if dataRequest['endpoint'] == 'historical_data':
                 if 'start_date' in dataRequest and 'end_date' not in dataRequest:
-                    raise Exception('If you provide a start_date, then you must also provide an end_date!')
+                    raise Exception('If you provide a start_date,' + 
+                                    ' then you must also provide an end_date!')
                 elif 'end_date' in dataRequest and 'start_date' not in dataRequest:
                     dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
                             dataRequest['end_date'], 
                             dataRequest['item']
                             )
+                    dataRequest['start_date'] = self.dateAdjuster.defineStartDate(dataRequest['end_date'])
                 elif 'end_date' not in dataRequest and 'start_date' not in dataRequest:
                     dataRequest['end_date'] = self.dateAdjuster.defineEndDate(dataRequest['item'])
-       
-                dataRequest['start_date'] = self.dateAdjuster.defineStartDate(dataRequest['end_date'])
-            
+                    dataRequest['start_date'] = self.dateAdjuster.defineStartDate(dataRequest['end_date'])
+                elif 'end_date' in dataRequest and 'start_date' in dataRequest:
+                    pass
             elif dataRequest['endpoint'] == 'data_point':
                 if 'end_date' in dataRequest or 'start_date' in dataRequest:
                     raise Exception("The 'data_point' endpoint does not take in dates" + 

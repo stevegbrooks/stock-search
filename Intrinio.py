@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from ANewDesign.StockAPICaller import StockAPICaller
+from StockAPICaller import StockAPICaller
 
 class Intrinio(StockAPICaller):
     dataRequest = dict()
@@ -15,7 +15,7 @@ class Intrinio(StockAPICaller):
         self.dataRequest = dataRequest
     
     def getStockData(self, tickers):
-        
+        self.item = self.dataRequest['item']
         stockSymbol = []
         currentData = []
         for ticker in tickers:
@@ -30,14 +30,21 @@ class Intrinio(StockAPICaller):
                 errorMessage = 'Check your Intrinio username or password or URL address' 
                 raise Exception(errorMessage)
             
-            jsonData = response.json()['data']
+            jsonData = response.json()['value']
             
-            if len(jsonData) == 0:
+            if jsonData == '':
                 print('Unable to retrieve ' + self.endpoint + ': ', self.item, 
                       ' data from Intrinio for ' + ticker)
                 currentData.append(0)
             else:
-                #TODO - figure out how to get data from intrinio when 'data_point' is passed 
-                pass
+                if self.item == 'weightedavebasicsharesos':
+                    currentData.append(int(jsonData))
+                else:
+                    currentData.append(jsonData)
         
-        return pd.DataFrame({'stockSymbol' : stockSymbol, self.item : currentData})
+        if self.item == 'weightedavebasicsharesos':
+            colName = 'outstandingShares'
+        else:
+            colName = self.item
+    
+        return pd.DataFrame({'stockSymbol' : stockSymbol, colName : currentData})
