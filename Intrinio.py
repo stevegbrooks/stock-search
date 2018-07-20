@@ -32,7 +32,7 @@ class Intrinio(StockAPICaller):
             
             jsonData = response.json()['value']
             
-            if jsonData == '':
+            if jsonData == 'na':
                 print('Unable to retrieve ' + self.endpoint + ': ', self.item, 
                       ' data from Intrinio for ' + ticker)
                 currentData.append(0)

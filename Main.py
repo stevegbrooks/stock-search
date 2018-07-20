@@ -5,7 +5,7 @@ ui = UserInterface()
 
 ui.isHistoricalMode = True
 
-tickers = 'AAPL'
+tickers = 'testTickers.xlsx'
 stockData = ui.researchStocks(tickers)
 
 if ui.fileInput == True:
