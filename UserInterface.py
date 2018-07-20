@@ -106,9 +106,9 @@ class UserInterface:
                                                       row[self.closePriceColName2]),
                                                       axis = 1)
             dataFrame['lastVolume'] = dataFrame[self.lastVolColName]
-            dataFrame.drop(columns = [self.closePriceColName1,
-                                      self.closePriceColName2,
-                                      self.lastVolColName], inplace = True)
+#            dataFrame.drop(columns = [self.closePriceColName1,
+#                                      self.closePriceColName2,
+#                                      self.lastVolColName], inplace = True)
         dataFrame['peadScore'] = dataFrame.apply(
                 lambda row: calc.PEAD(row[self.avgVolColName], 
                                       row['outstandingShares']), 
@@ -204,6 +204,8 @@ class UserInterface:
                      + '--------------------------\n')
             try:
                 date = datetime.strptime(date, '%Y-%m-%d')
+                dayOfWeek = date.weekday()
+                if dayOfWeek > 4: print('The date you entered falls on a weekend - percentChange will be 0.')
                 switch = 0
             except ValueError:
                 print('Unrecognized date format, please try again\n')
@@ -229,7 +231,14 @@ class UserInterface:
                     dataRequest['end_date'] = self.dateAdjuster.defineEndDate(dataRequest['item'])
                     dataRequest['start_date'] = self.dateAdjuster.defineStartDate(dataRequest['end_date'])
                 elif 'end_date' in dataRequest and 'start_date' in dataRequest:
-                    pass
+                    dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                            dataRequest['end_date'], 
+                            dataRequest['item']
+                            )
+                    dataRequest['start_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                            dataRequest['start_date'], 
+                            dataRequest['item']
+                            )
             elif dataRequest['endpoint'] == 'data_point':
                 if 'end_date' in dataRequest or 'start_date' in dataRequest:
                     raise Exception("The 'data_point' endpoint does not take in dates" + 

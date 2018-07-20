@@ -48,5 +48,8 @@ class Calculator:
     
     def getPercentChange(closePrice1, closePrice2):
         diff = closePrice1 - closePrice2
-        change = diff/closePrice2 * 100
+        if closePrice2 != 0:
+            change = diff/closePrice2 * 100
+        else:
+            change = 0
         return round(change, 2)
