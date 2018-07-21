@@ -14,6 +14,7 @@ class UserInterface:
     stockAPICallers = dict()
     fileInput = False
     isHistoricalMode = False
+    historicalDate = ''
     trailingDays = 155
     userSpecifiedDate = ''
     avgVolColName = ''
@@ -45,7 +46,7 @@ class UserInterface:
         if self.isHistoricalMode == False:
             stockData = self.callAPIs(tickerInput)
         else:
-            self.userSpecifiedDate = self.getDateFromUser()
+            self.userSpecifiedDate = self.dateAdjuster.convertToDate(self.historicalDate)
             dayBefore = self.userSpecifiedDate - timedelta(days = 1)
             dayBeforeAsString = datetime.strftime(dayBefore, '%Y-%m-%d')
             dateAsString = datetime.strftime(self.userSpecifiedDate, '%Y-%m-%d')
@@ -194,7 +195,6 @@ class UserInterface:
                 raise Exception('Currently only .xlsx and .csv files are supported.')
         else:
             output.append(userInput)
-        
         return output
     
     def getDateFromUser(self):
@@ -231,14 +231,20 @@ class UserInterface:
                     dataRequest['end_date'] = self.dateAdjuster.defineEndDate(dataRequest['item'])
                     dataRequest['start_date'] = self.dateAdjuster.defineStartDate(dataRequest['end_date'])
                 elif 'end_date' in dataRequest and 'start_date' in dataRequest:
-                    dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
-                            dataRequest['end_date'], 
-                            dataRequest['item']
-                            )
-                    dataRequest['start_date'] = self.dateAdjuster.adjustForDayOfWeek(
-                            dataRequest['start_date'], 
-                            dataRequest['item']
-                            )
+                    if dataRequest['end_date'] == dataRequest['start_date']:
+                        dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                                dataRequest['end_date'], 
+                                'pointVolume')
+                        dataRequest['start_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                                dataRequest['start_date'], 
+                                'pointVolume')
+                    else:
+                        dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                                dataRequest['end_date'], 
+                                dataRequest['item'])
+                        dataRequest['start_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                                dataRequest['start_date'], 
+                                dataRequest['item'])
             elif dataRequest['endpoint'] == 'data_point':
                 if 'end_date' in dataRequest or 'start_date' in dataRequest:
                     raise Exception("The 'data_point' endpoint does not take in dates" + 
