@@ -1,33 +1,48 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import re
+import os
 from datetime import datetime, timedelta
 from StockAPIFactory import StockAPIFactory as apiFactory
 from Secret import Secret
 from Utilities.DateAdjuster import DateAdjuster
-from Utilities.FileReader import FileReader as fr
-from Utilities.FileWriter import FileWriter as fw
-from Utilities.Calculator import Calculator as calc
+from Utilities.FileReader import FileReader 
+from Utilities.FileWriter import FileWriter
+from Utilities.Calculator import Calculator
 
 class UserInterface:
+    fw = FileWriter()
+    fr = FileReader()
+    calc = Calculator()
+    dateAdjuster = DateAdjuster()
+    secret = Secret()
     
     stockAPICallers = dict()
     fileInput = False
     isHistoricalMode = False
-    historicalDate = ''
+    referenceDate = ''
     trailingDays = 155
     userSpecifiedDate = ''
     avgVolColName = ''
-    lastVolColName = ''
+    avgVolEndDate = ''
+    avgVolStartDate = ''
+    histVolColName = ''
     closePriceColName1 = ''
     closePriceColName2 = ''
-    secret = Secret()
-    dateAdjuster = DateAdjuster()
     
-    def __init__(self):
-        self.stockAPICallers = dict()
-        self.secret = Secret()
+    def __init__(self, isHistoricalMode, referenceDate):
+        self.fr = FileReader()
+        self.fw = FileWriter()
+        self.calc = Calculator()
         self.dateAdjuster = DateAdjuster()
+        self.secret = Secret()
+        
+        self.isHistoricalMode = isHistoricalMode
+        if self.isHistoricalMode == True:
+            self.referenceDate = referenceDate
+        else:
+            self.referenceDate = self.dateAdjuster.adjustForDayOfWeek(datetime.today(), 'refDate')
+        self.stockAPICallers = dict()
         gfKey = self.secret.getGFKey()
         intrinioKey = self.secret.getIntrinioKey()
         self.specifyAPI('gurufocus', gfKey, dataRequest = {'endpoint' : 'summary'})
@@ -46,7 +61,7 @@ class UserInterface:
         if self.isHistoricalMode == False:
             stockData = self.callAPIs(tickerInput)
         else:
-            self.userSpecifiedDate = self.dateAdjuster.convertToDate(self.historicalDate)
+            self.userSpecifiedDate = self.dateAdjuster.convertToDate(self.referenceDate)
             dayBefore = self.userSpecifiedDate - timedelta(days = 1)
             dayBeforeAsString = datetime.strftime(dayBefore, '%Y-%m-%d')
             dateAsString = datetime.strftime(self.userSpecifiedDate, '%Y-%m-%d')
@@ -62,7 +77,7 @@ class UserInterface:
                             'end_date' : dateAsString}
             histModeRequests['outstandingShares'] = {'endpoint' : 'data_point', 
                             'item' : 'weightedavebasicsharesos'}
-            histModeRequests['name'] = {'endpoint' : 'data_point', 
+            histModeRequests['fname'] = {'endpoint' : 'data_point', 
                             'item' : 'name'}
             histModeRequests['lastPrice'] = {'endpoint' : 'historical_data', 
                             'item' : 'close_price',
@@ -79,10 +94,13 @@ class UserInterface:
             for request in histModeRequests:
                 self.specifyAPI('intrinio', intrinioKey, histModeRequests.get(request))
             
+            
             stockData = self.callAPIs(tickerInput)
                 
         self.identifyColNames(stockData)        
         stockData = self.calcNewColumns(stockData)
+        stockData = self.deleteExtraCols(stockData)
+        stockData['referenceDate'] = self.referenceDate
         stockData = self.reindexColumns(stockData)
         return self.renameColumns(stockData)
     
@@ -103,50 +121,54 @@ class UserInterface:
         if self.isHistoricalMode:
             dataFrame['lastPrice'] = dataFrame[self.closePriceColName1]
             dataFrame['percentChange'] = dataFrame.apply(
-                    lambda row: calc.getPercentChange(row[self.closePriceColName1],
+                    lambda row: self.calc.getPercentChange(row[self.closePriceColName1],
                                                       row[self.closePriceColName2]),
                                                       axis = 1)
-            dataFrame['lastVolume'] = dataFrame[self.lastVolColName]
-#            dataFrame.drop(columns = [self.closePriceColName1,
-#                                      self.closePriceColName2,
-#                                      self.lastVolColName], inplace = True)
+            dataFrame['lastVolume'] = dataFrame[self.histVolColName]
+
         dataFrame['peadScore'] = dataFrame.apply(
-                lambda row: calc.PEAD(row[self.avgVolColName], 
+                lambda row: self.calc.PEAD(row[self.avgVolColName], 
                                       row['outstandingShares']), 
                                       axis = 1)
         dataFrame['marketCap'] = dataFrame.apply(
-                lambda row: calc.mktCap(row['lastPrice'], 
+                lambda row: self.calc.mktCap(row['lastPrice'], 
                                         row['outstandingShares']), 
                                         axis = 1)
         dataFrame['dollarVolume'] = dataFrame.apply(
-                lambda row: calc.dollarVol(row['lastPrice'], 
+                lambda row: self.calc.dollarVol(row['lastPrice'], 
                                            row['lastVolume']), 
                                            axis = 1)
-        dataFrame['volOverMC'] = dataFrame.apply(
-                lambda row: calc.volOverMC(row['lastVolume'], 
-                                           row['lastPrice'], 
-                                           row['outstandingShares']),
-                                           axis = 1)
         dataFrame['moveStrength'] = dataFrame.apply(
-                lambda row: calc.moveStrength(row['lastPrice'],
+                lambda row: self.calc.moveStrength(row['lastPrice'],
                                               row['lastVolume'],
                                               row['outstandingShares'],
                                               row[self.avgVolColName]),
                                               axis = 1)
-        return dataFrame 
+        dataFrame['avgVolEndDate'] = self.avgVolEndDate
+        dataFrame['avgVolStartDate'] = self.avgVolStartDate
+        return dataFrame
+    
+    def deleteExtraCols(self, dataFrame):
+        if self.isHistoricalMode == True:
+            dataFrame.drop([self.histVolColName, 
+                            self.closePriceColName1, 
+                            self.closePriceColName2], axis = 1, inplace = True)
+        return dataFrame
         
     def reindexColumns(self, dataFrame):
-        newDataFrame = dataFrame.reindex(['stockSymbol', 'name', 'marketCap',
-                                       'lastPrice', 'peadScore', 'percentChange',
-                                       'dollarVolume', 'moveStrength', 'volOverMC',
-                                       '', '', '', '', 'outstandingShares', '',
-                                       'lastVolume',], axis = 1, copy = True)
-    
+        newDataFrame = dataFrame.reindex(['referenceDate', 'blank1', 'blank2', 'blank3',
+                                          'stockSymbol', 'name', 'marketCap', 'lastPrice', 
+                                          'peadScore', 'percentChange', 'dollarVolume', 
+                                          'moveStrength', 'blank4', 'blank5', 
+                                          'outstandingShares', 'blank6',
+                                          'lastVolume',], axis = 1, copy = True)  
+        regex = re.compile("blank[0-9]{1}")
+        withoutBlanks = filter(lambda i: not regex.search(i), 
+                               newDataFrame.columns.tolist())
         dataFrame = pd.merge(newDataFrame, 
                              dataFrame, 
-                             on = list(filter(None, newDataFrame.columns.tolist())), 
+                             on = list(filter(None, withoutBlanks)), 
                              how = 'left')
-        
         return dataFrame
     
     def renameColumns(self, dataFrame):
@@ -154,29 +176,33 @@ class UserInterface:
                                      columns = {"marketCap" : "marketCap(M)", 
                                                 "lastVolume" : "lastVolume(delayed)", 
                                                 "dollarVolume" : "dollarVolume(M)", 
-                                                "volOverMC" : "dollarVol/MC(%)", 
                                                 "lastPrice" : "lastPrice(delayed)",
-                                                "peadScore" : "PEAD"})
+                                                "peadScore" : "PEAD",
+                                                self.avgVolColName : 'avgVolume'})
         return dataFrame
-    
-    
     
     def identifyColNames(self, dataFrame):
         colNames = dataFrame.columns.tolist()
         r = re.compile("(avgVolume[\\w\\W]*)")
         self.avgVolColName = list(filter(r.match, colNames))[0]
+        s = pd.Series([self.avgVolColName])
+        self.avgVolEndDate = s.str.extract('avgVolume\\[([\\w\\W]{10})', expand = False)[0]
+        self.avgVolStartDate = s.str.extract('avgVolume\\[[\\w\\W]{10}\\:([\\w\\W]{10})', expand = False)[0]
         if self.isHistoricalMode:
             r = re.compile("([\\w\\W]*close_price[\\w\\W]*)")
             self.closePriceColName1 = list(filter(r.match, colNames))[0]
             self.closePriceColName2 = list(filter(r.match, colNames))[1]
             r = re.compile("(volume[\\w\\W]*)")
-            self.lastVolColName = list(filter(r.match, colNames))[0]
+            self.histVolColName = list(filter(r.match, colNames))[0]
     
     def writeToFile(self, dataFrame, fileName):
         match = re.search('\\.[a-zA-Z]*$', fileName, flags = 0)
         if match:
             if match.group(0) == '.xlsx':
-                fw.writeToExcel(dataFrame, fileName)
+                if os.path.isfile(fileName) == True:
+                    self.fw.appendToExcel(dataFrame, fileName)
+                else:
+                    self.fw.writeToExcel(dataFrame, fileName)
             else:
                 raise Exception('Currently only writing to .xlsx and .csv files is supported.')
         else:
@@ -190,7 +216,7 @@ class UserInterface:
             if match.group(0) == '.xlsx' or match.group(0) == '.csv':
                 self.fileInput = True
                 columnNumber = 0
-                output = fr.readExcelColumn(userInput, columnNumber)
+                output = self.fr.readExcelColumn(userInput, columnNumber)
             else:
                 raise Exception('Currently only .xlsx and .csv files are supported.')
         else:

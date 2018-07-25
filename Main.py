@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from UserInterface import UserInterface
-ui = UserInterface()
-#Toggle this to True to activate 'Historical Mode'
-ui.isHistoricalMode = True
-#make sure to use YYYY-MM-DD format
-    #this will be ignored if the line above is 'False'
-ui.historicalDate = '2018-07-20'
+#make sure to use YYYY-MM-DD format for the date
+    #the date will be ignored if 'isHistoricalMode' is 'False'
+ui = UserInterface(isHistoricalMode = False, 
+                   referenceDate = '2018-07-23')
 
-tickers = 'testTickers.xlsx'
+tickers = 'AAPL'
 stockData = ui.researchStocks(tickers)
 
 if ui.fileInput == True:

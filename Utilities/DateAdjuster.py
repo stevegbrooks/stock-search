@@ -16,10 +16,15 @@ class DateAdjuster:
         if item == 'volume':
             if dayOfWeek < 5:#mon-fri
                 date = date - timedelta(days = 1)
-        if dayOfWeek == 5:#sat
-            date = date - timedelta(days = 2)
-        elif dayOfWeek == 6:#sun
-            date = date - timedelta(days = 3)
+            elif dayOfWeek == 5:#sat
+                date = date - timedelta(days = 2)
+            elif dayOfWeek == 6:#sun
+                date = date - timedelta(days = 3)
+        else:
+            if dayOfWeek == 5:#sat
+                date = date - timedelta(days = 1)
+            elif dayOfWeek == 6:#sun
+                date = date - timedelta(days = 2)
         
         return datetime.strftime(date, '%Y-%m-%d')
     

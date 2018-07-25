@@ -45,7 +45,7 @@ class GuruFocus(StockAPICaller):
                 companyName.append(self.companyData['0'])
                 lastVolume.append(int(float(self.companyData['volumn_day_total'])))
                 lastPrice.append(float(self.companyData['price']))
-                percentChange.append(float(self.companyData['p_pct_change']))
+                percentChange.append(round(float(self.companyData['p_pct_change'])/100, 4))
                 outstandingShares.append(int(float(self.companyData['shares']) * 1000000))
             
         guruFocusResults = pd.DataFrame({'stockSymbol' : stockSymbol,
