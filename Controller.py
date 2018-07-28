@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from StockAPIFactory import StockAPIFactory as apiFactory
-from Secret import Secret
 from Utilities.DateAdjuster import DateAdjuster
 from Utilities.Calculator import Calculator
 
 class Controller:
-    global calc, datAdjuster, secret
+    global calc, datAdjuster
     
     tickerInput = []
     stockAPICallers = dict()
@@ -19,6 +18,8 @@ class Controller:
     trailingDays = 155
     userSpecifiedDate = ''
     
+    settings = dict()
+    
     avgVolColName = ''
     avgVolEndDate = ''
     avgVolStartDate = ''
@@ -26,80 +27,29 @@ class Controller:
     closePriceColName1 = ''
     closePriceColName2 = ''
     
-    def __init__(self, isHistoricalMode, referenceDate, tickerInput):
-        self.isHistoricalMode = isHistoricalMode
-        self.tickerInput = tickerInput
+    def __init__(self, isHistoricalMode, APISettings, tickerInput):
         self.dateAdjuster = DateAdjuster()
-        
-        if self.isHistoricalMode == True:
-            self.referenceDate = referenceDate
-        else:
-            self.referenceDate = self.dateAdjuster.adjustForDayOfWeek(datetime.today(), 'refDate')
-        
         self.calc = Calculator()
-        self.secret = Secret()
-        self.stockAPICallers = dict()
-        gfKey = self.secret.getGFKey()
-        intrinioKey = self.secret.getIntrinioKey()
+        self.isHistoricalMode = isHistoricalMode
+        if isHistoricalMode is True:
+            self.settings = APISettings.getHistoricalSettings()
+            self.referenceDate = self.settings.pop('referenceDate')
+        else:
+            self.settings = APISettings.getDefaultSettings()
+            self.referenceDate = self.dateAdjuster.adjustForDayOfWeek(datetime.today(), 'referenceDate')
+        self.tickerInput = tickerInput
         
-        self.specifyAPI('gurufocus', gfKey, dataRequest = {'endpoint' : 'summary'})
-        self.specifyAPI('intrinio', intrinioKey, dataRequest = {'endpoint' : 'historical_data', 
-                                                                'item' : 'volume'})
+        for i in self.settings:
+            self.specifyAPI(self.settings[i]['api'], 
+                            self.settings[i]['key'], 
+                            self.settings[i]['dataRequest']) 
+        
     def specifyAPI(self, api, key, dataRequest):
         apiArgs = dict()
         apiArgs[api] = key
         dataRequest = self.validateDataRequest(api, dataRequest)
         self.stockAPICallers[len(self.stockAPICallers)] = apiFactory.getAPI(apiFactory, 
                              apiArgs, dataRequest)
-    
-    def researchStocks(self):
-        stockData = pd.DataFrame()
-        
-        if self.isHistoricalMode == False:
-            stockData = self.callAPIs(self.tickerInput)
-        else:
-            self.userSpecifiedDate = self.dateAdjuster.convertToDate(self.referenceDate)
-            dayBefore = self.userSpecifiedDate - timedelta(days = 1)
-            dayBeforeAsString = datetime.strftime(dayBefore, '%Y-%m-%d')
-            dateAsString = datetime.strftime(self.userSpecifiedDate, '%Y-%m-%d')
-            
-            self.stockAPICallers.clear()
-            apiArgs = dict()
-            intrinioKey = self.secret.getIntrinioKey()
-            apiArgs['intrinio'] = intrinioKey
-           
-            histModeRequests = dict()
-            histModeRequests['avgVolume'] = {'endpoint' : 'historical_data', 
-                            'item' : 'volume', 
-                            'end_date' : dateAsString}
-            histModeRequests['outstandingShares'] = {'endpoint' : 'data_point', 
-                            'item' : 'weightedavebasicsharesos'}
-            histModeRequests['fname'] = {'endpoint' : 'data_point', 
-                            'item' : 'name'}
-            histModeRequests['lastPrice'] = {'endpoint' : 'historical_data', 
-                            'item' : 'close_price',
-                            'end_date' : dateAsString,
-                            'start_date' : dateAsString}
-            histModeRequests['lastPriceDayBefore'] = {'endpoint' : 'historical_data', 
-                            'item' : 'close_price',
-                            'end_date' : dayBeforeAsString,
-                            'start_date' : dayBeforeAsString}
-            histModeRequests['lastVolume'] = {'endpoint' : 'historical_data', 
-                            'item' : 'volume',
-                            'end_date' : dateAsString,
-                            'start_date' : dateAsString}
-            for request in histModeRequests:
-                self.specifyAPI('intrinio', intrinioKey, histModeRequests.get(request))
-            
-            
-            stockData = self.callAPIs(self.tickerInput)
-                
-        self.identifyColNames(stockData)        
-        stockData = self.calcNewColumns(stockData)
-        stockData = self.deleteExtraCols(stockData)
-        stockData['referenceDate'] = self.referenceDate
-        stockData = self.reindexColumns(stockData)
-        return self.renameColumns(stockData)
     
     def callAPIs(self, tickerInput):
         stockData = pd.DataFrame()
