@@ -2,10 +2,10 @@
 from UserInterface import UserInterface
 
 ui = UserInterface()
+
 ui.setHistoricalMode(False)
-#if setHistoricalMode(False), then date is ignored
 ui.setAPIs('garethsSettings', '2018-07-23') 
-ui.setTickerInput('tickers.xlsx')
+ui.setTickerInput('tickers.xlsx', justTickers = True)
 
 stockData = ui.handleRequest()
 

@@ -69,9 +69,9 @@ class UserInterface:
             if match.group(0) == '.xlsx' or match.group(0) == '.csv':
                 self.fileInput = True
                 if justTickers is True:
-                    output = self.fr.readExcelColumn(tickerInput)
+                    output = self.fr.readExcel(tickerInput).iloc[:,0]
                 else:
-                    #output = self.fr.readExcel(tickerInput).loc[1:2]
+                    output = self.fr.readExcel(tickerInput).iloc[:,0:2]
             else:
                 raise Exception('Currently only .xlsx and .csv files are supported.')
         else:
