@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
-import re
 from datetime import datetime
 from StockAPIFactory import StockAPIFactory as apiFactory
 from Utilities.DateAdjuster import DateAdjuster
-from Utilities.Calculator import Calculator
 
 class Controller:
-    global calc, da
+    global da
     
     tickerInput = []
     stockAPICallers = dict()
@@ -20,17 +18,9 @@ class Controller:
     
     settings = dict()
     
-    avgVolColName = ''
-    avgVolEndDate = ''
-    avgVolStartDate = ''
-    histVolColName = ''
-    closePriceColName1 = ''
-    closePriceColName2 = ''
-    
     def __init__(self, isHistoricalMode, appSettings, tickerInput):
         self.stockAPICallers = dict()
         self.da = DateAdjuster()
-        self.calc = Calculator()
         self.isHistoricalMode = isHistoricalMode
         if isHistoricalMode is True:
             self.settings = appSettings.getHistoricalSettings()
@@ -62,96 +52,6 @@ class Controller:
                 else:
                     apiData = results
         return apiData
-    
-    def calcNewColumns(self, dataFrame):
-        if self.isHistoricalMode:
-            dataFrame['lastPrice'] = dataFrame[self.closePriceColName1]
-            dataFrame['percentChange'] = dataFrame.apply(
-                    lambda row: self.calc.getPercentChange(row[self.closePriceColName1],
-                                                      row[self.closePriceColName2]),
-                                                      axis = 1)
-            dataFrame['lastVolume'] = dataFrame[self.histVolColName]
-
-        dataFrame['peadScore'] = dataFrame.apply(
-                lambda row: self.calc.PEAD(row[self.avgVolColName], 
-                                      row['outstandingShares']), 
-                                      axis = 1)
-        dataFrame['marketCap'] = dataFrame.apply(
-                lambda row: self.calc.mktCap(row['lastPrice'], 
-                                        row['outstandingShares']), 
-                                        axis = 1)
-        dataFrame['dollarVolume'] = dataFrame.apply(
-                lambda row: self.calc.dollarVol(row['lastPrice'], 
-                                           row['lastVolume']), 
-                                           axis = 1)
-        dataFrame['moveStrength'] = dataFrame.apply(
-                lambda row: self.calc.moveStrength(row['lastPrice'],
-                                              row['lastVolume'],
-                                              row['outstandingShares'],
-                                              row[self.avgVolColName]),
-                                              axis = 1)
-        dataFrame['avgVolEndDate'] = self.avgVolEndDate
-        dataFrame['avgVolStartDate'] = self.avgVolStartDate
-        return dataFrame
-    
-    def deleteExtraCols(self, dataFrame):
-        if self.isHistoricalMode == True:
-            dataFrame.drop([self.histVolColName, 
-                            self.closePriceColName1, 
-                            self.closePriceColName2], axis = 1, inplace = True)
-        return dataFrame
-        
-    def reindexColumns(self, dataFrame):
-        newDataFrame = dataFrame.reindex(['referenceDate', 'blank1', 'blank2', 'blank3',
-                                          'ticker', 'name', 'marketCap', 'lastPrice', 
-                                          'peadScore', 'percentChange', 'dollarVolume', 
-                                          'moveStrength', 'blank4', 'blank5', 
-                                          'outstandingShares', 'blank6',
-                                          'lastVolume',], axis = 1, copy = True)  
-        regex = re.compile("blank[0-9]{1}")
-        withoutBlanks = filter(lambda i: not regex.search(i), 
-                               newDataFrame.columns.tolist())
-        dataFrame = pd.merge(newDataFrame, 
-                             dataFrame, 
-                             on = list(filter(None, withoutBlanks)), 
-                             how = 'left')
-        return dataFrame
-    
-    def renameColumns(self, dataFrame):
-        dataFrame = dataFrame.rename(index = int, 
-                                     columns = {"marketCap" : "marketCap(M)", 
-                                                "lastVolume" : "lastVolume(delayed)", 
-                                                "dollarVolume" : "dollarVolume(M)", 
-                                                "lastPrice" : "lastPrice(delayed)",
-                                                "peadScore" : "PEAD",
-                                                self.avgVolColName : 'avgVolume'})
-        return dataFrame
-    
-    def identifyColNames(self, dataFrame):
-        colNames = dataFrame.columns.tolist()
-        r = re.compile("(avgVolume[\\w\\W]*)")
-        self.avgVolColName = list(filter(r.match, colNames))[0]
-        s = pd.Series([self.avgVolColName])
-        self.avgVolEndDate = s.str.extract('avgVolume\\[([\\w\\W]{10})', expand = False)[0]
-        self.avgVolStartDate = s.str.extract('avgVolume\\[[\\w\\W]{10}\\:([\\w\\W]{10})', expand = False)[0]
-        if self.isHistoricalMode:
-            r = re.compile("([\\w\\W]*close_price[\\w\\W]*)")
-            self.closePriceColName1 = list(filter(r.match, colNames))[0]
-            self.closePriceColName2 = list(filter(r.match, colNames))[1]
-            r = re.compile("(volume[\\w\\W]*)")
-            self.histVolColName = list(filter(r.match, colNames))[0]
-    
-#    def getDateFromUser(self):
-#        switch = 1
-#        while switch == 1:
-#            date = input('Input a date as YYYY-MM-DD\n' 
-#                     + '--------------------------\n')
-#            try:
-#                date = datetime.strptime(date, '%Y-%m-%d')
-#                switch = 0
-#            except ValueError:
-#                print('Unrecognized date format, please try again\n')
-#        return date
     
     def validateDataRequest(self, api, dataRequest):
         if 'endpoint' not in dataRequest:

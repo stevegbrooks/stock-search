@@ -39,7 +39,9 @@ class UserInterface:
         
         self.referenceDate = referenceDate
         self.isHistoricalMode = isHistoricalMode
-        self.appSettings = self.asf.getAppSettings(userSettings, self.referenceDate, self.isHistoricalMode)
+        self.appSettings = self.asf.getAppSettings(userSettings, 
+                                                   self.referenceDate, 
+                                                   self.isHistoricalMode)
     
     def setTickerInput(self, tickerInput):
         if type(tickerInput) is not str:

@@ -2,8 +2,8 @@ from UserInterface import UserInterface
 
 ui = UserInterface()
 
-stockData = ui.runApplication(isHistoricalMode = False, 
+stockData = ui.runApplication(isHistoricalMode = True, 
                                userSettingsProfile = 'garethsSettings', 
                                referenceDate = '2018-07-01', 
                                ticker = 'AAPL')
-stockData.iloc[0]
+print(stockData.iloc[0])
