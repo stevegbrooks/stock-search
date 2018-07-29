@@ -3,9 +3,8 @@ from UserInterface import UserInterface
 
 ui = UserInterface()
 
-###It is crucial that the dates in the excel file follow this format:
-    ###YYYY-MM-DD
-        ###Format the entire column to 'Text', and then enter the dates
+###The input file must include a column named 'tickers' and a column named 'dates'
+        
 tickers = ui.readTickerInput('tickers.xlsx')
 
 stockData = pd.DataFrame()
