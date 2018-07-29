@@ -7,7 +7,7 @@ from Utilities.DateAdjuster import DateAdjuster
 from Utilities.Calculator import Calculator
 
 class Controller:
-    global calc, datAdjuster
+    global calc, da
     
     tickerInput = []
     stockAPICallers = dict()
@@ -27,16 +27,17 @@ class Controller:
     closePriceColName1 = ''
     closePriceColName2 = ''
     
-    def __init__(self, isHistoricalMode, APISettings, tickerInput):
-        self.dateAdjuster = DateAdjuster()
+    def __init__(self, isHistoricalMode, appSettings, tickerInput):
+        self.stockAPICallers = dict()
+        self.da = DateAdjuster()
         self.calc = Calculator()
         self.isHistoricalMode = isHistoricalMode
         if isHistoricalMode is True:
-            self.settings = APISettings.getHistoricalSettings()
+            self.settings = appSettings.getHistoricalSettings()
             self.referenceDate = self.settings.pop('referenceDate')
         else:
-            self.settings = APISettings.getDefaultSettings()
-            self.referenceDate = self.dateAdjuster.adjustForDayOfWeek(datetime.today(), 'referenceDate')
+            self.settings = appSettings.getDefaultSettings()
+            self.referenceDate = self.da.adjustDate(datetime.today(), 'referenceDate')
         self.tickerInput = tickerInput
         
         for i in self.settings:
@@ -52,17 +53,15 @@ class Controller:
                              apiArgs, dataRequest)
     
     def callAPIs(self, tickerInput):
-        stockData = pd.DataFrame()
+        apiData = pd.DataFrame()
         for caller in self.stockAPICallers:
                 results = self.stockAPICallers[caller].getStockData(tickerInput)
-                if len(stockData != 0):
-                    stockData = pd.merge(stockData, 
-                                         results, 
-                                         on = 'stockSymbol', 
-                                         how = 'left')
+                if len(apiData) != 0:
+                    apiData = pd.merge(apiData, 
+                                       results, on = 'ticker', how = 'left')
                 else:
-                    stockData = results
-        return stockData
+                    apiData = results
+        return apiData
     
     def calcNewColumns(self, dataFrame):
         if self.isHistoricalMode:
@@ -104,7 +103,7 @@ class Controller:
         
     def reindexColumns(self, dataFrame):
         newDataFrame = dataFrame.reindex(['referenceDate', 'blank1', 'blank2', 'blank3',
-                                          'stockSymbol', 'name', 'marketCap', 'lastPrice', 
+                                          'ticker', 'name', 'marketCap', 'lastPrice', 
                                           'peadScore', 'percentChange', 'dollarVolume', 
                                           'moveStrength', 'blank4', 'blank5', 
                                           'outstandingShares', 'blank6',
@@ -165,27 +164,27 @@ class Controller:
                     raise Exception('If you provide a start_date,' + 
                                     ' then you must also provide an end_date!')
                 elif 'end_date' in dataRequest and 'start_date' not in dataRequest:
-                    dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                    dataRequest['end_date'] = self.da.adjustDate(
                             dataRequest['end_date'], 
                             dataRequest['item']
                             )
-                    dataRequest['start_date'] = self.dateAdjuster.defineStartDate(dataRequest['end_date'])
+                    dataRequest['start_date'] = self.da.defineStartDate(dataRequest['end_date'])
                 elif 'end_date' not in dataRequest and 'start_date' not in dataRequest:
-                    dataRequest['end_date'] = self.dateAdjuster.defineEndDate(dataRequest['item'])
-                    dataRequest['start_date'] = self.dateAdjuster.defineStartDate(dataRequest['end_date'])
+                    dataRequest['end_date'] = self.da.defineEndDate(dataRequest['item'])
+                    dataRequest['start_date'] = self.da.defineStartDate(dataRequest['end_date'])
                 elif 'end_date' in dataRequest and 'start_date' in dataRequest:
                     if dataRequest['end_date'] == dataRequest['start_date']:
-                        dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                        dataRequest['end_date'] = self.da.adjustDate(
                                 dataRequest['end_date'], 
                                 'pointVolume')
-                        dataRequest['start_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                        dataRequest['start_date'] = self.da.adjustDate(
                                 dataRequest['start_date'], 
                                 'pointVolume')
                     else:
-                        dataRequest['end_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                        dataRequest['end_date'] = self.da.adjustDate(
                                 dataRequest['end_date'], 
                                 dataRequest['item'])
-                        dataRequest['start_date'] = self.dateAdjuster.adjustForDayOfWeek(
+                        dataRequest['start_date'] = self.da.adjustDate(
                                 dataRequest['start_date'], 
                                 dataRequest['item'])
             elif dataRequest['endpoint'] == 'data_point':

@@ -5,25 +5,26 @@ Created on Sat Jul 28 13:12:20 2018
 
 @author: sgb
 """
-from UserSettings.APISettings import APISettings
+from UserSettings.AppSettings import AppSettings
 from UserSettings.APIKeys_Gareth import APIKeys_Gareth
+from UserSettings.OutputManager_Gareth import OutputManager_Gareth
 from Utilities.DateAdjuster import DateAdjuster
 from datetime import datetime, timedelta
 
-class APISettings_Gareth(APISettings):
+class AppSettings_Gareth(AppSettings):
     
-    global myAPIKeys, dateAdjuster
+    global myAPIKeys, da, outputManager
     settings = dict()
     histModeSettings = dict()
     gfKey = ''
     intrinioKey = ''
-    
     referenceDate = ''
     trailingDays = 155
     
-    def __init__(self, referenceDate):
+    def __init__(self, referenceDate, isHistoricalMode):
         super().__init__(referenceDate)
-        self.dateAdjuster = DateAdjuster()
+        self.da = DateAdjuster()
+        self.outputManager = OutputManager_Gareth()
         self.myAPIKeys = APIKeys_Gareth()
         self.gfKey = self.myAPIKeys.getGFKey()
         self.intrinioKey = self.myAPIKeys.getIntrinioKey()
@@ -31,7 +32,8 @@ class APISettings_Gareth(APISettings):
         self.referenceDate = referenceDate
         
         self.setDefault()
-        self.setHistorical()
+        if isHistoricalMode:
+            self.setHistorical()
     
     def setDefault(self):
         self.settings['gurufocus'] = {'api' : 'gurufocus', 
@@ -43,14 +45,14 @@ class APISettings_Gareth(APISettings):
                                        'item' : 'volume'}}
     
     def setHistorical(self):
-        userSpecifiedDate = self.dateAdjuster.convertToDate(self.referenceDate)
+        userSpecifiedDate = self.da.adjustDate(self.referenceDate, returnAsDate = True)
         dateAsString = datetime.strftime(userSpecifiedDate, '%Y-%m-%d')
         
-        dayBefore = userSpecifiedDate - timedelta(days = 1)
-        dayBeforeAsString = datetime.strftime(dayBefore, '%Y-%m-%d')
+        dayBeforeAsString = self.da.adjustDate(userSpecifiedDate - timedelta(days = 1), 
+                                               returnAsDate = False)
         
-        dayTrailing = userSpecifiedDate - timedelta(days = self.trailingDays)
-        dayTrailingAsString = datetime.strftime(dayTrailing, '%Y-%m-%d')
+        dayTrailingAsString = self.da.adjustDate(userSpecifiedDate - timedelta(days = self.trailingDays),
+                                                 returnAsDate = False)
 
         self.histModeSettings['referenceDate'] = dateAsString
         self.histModeSettings['avgVolume'] = {'api' : 'intrinio', 
@@ -96,6 +98,9 @@ class APISettings_Gareth(APISettings):
         
         def getHistoricalSettings(self):
             return self.histModeSettings
+        
+        def getOutputManager(self):
+            return self.outputManager
         
         def setTrailingDays(self, trailingDays):
             if type(trailingDays) is not int:

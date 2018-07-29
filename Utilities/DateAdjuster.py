@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, date
 
 class DateAdjuster:
     
-    def adjustForDayOfWeek(self, date, item):
+    def adjustDate(self, date, item = 'refDate', returnAsDate = False):
         if type(date) == str:
             date = self.convertToDate(date)
         dayOfWeek = date.weekday()
@@ -25,8 +25,10 @@ class DateAdjuster:
                 date = date - timedelta(days = 1)
             elif dayOfWeek == 6:#sun
                 date = date - timedelta(days = 2)
-        
-        return datetime.strftime(date, '%Y-%m-%d')
+        if returnAsDate == True:
+            return date
+        else:
+            return datetime.strftime(date, '%Y-%m-%d')
     
     def defineStartDate(self, end_date):
         end_date = self.convertToDate(end_date)
@@ -35,13 +37,14 @@ class DateAdjuster:
     
     def defineEndDate(self, item):
         end_date = date.today()
-        return self.adjustForDayOfWeek(end_date, item)
+        return self.adjustDate(end_date, item)
         
     
     def convertToDate(self, dateString):
         try:
             date = datetime.strptime(dateString, '%Y-%m-%d')
+            return date
         except ValueError:
             print(dateString + ' is in an unrecognized date format' + '\n')
            
-        return date
+        

@@ -6,14 +6,14 @@ Created on Sat Jul 28 14:25:04 2018
 @author: sgb
 """
 
-from UserSettings.APISettings_Gareth import APISettings_Gareth
+from UserSettings.AppSettings_Gareth import AppSettings_Gareth
 
-class APISettingsFactory:
+class AppSettingsFactory:
     
     apiSettings = dict()
     
-    def getAPISettings(self, desiredSettings, referenceDate):
+    def getAppSettings(self, desiredSettings, isHistoricalMode, referenceDate):
         if desiredSettings == 'garethsSettings':
-            return APISettings_Gareth(referenceDate)
+            return AppSettings_Gareth(isHistoricalMode, referenceDate)
         else:
             raise Exception('Settings file not found for ' + desiredSettings)

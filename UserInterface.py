@@ -6,75 +6,70 @@ Created on Sat Jul 28 11:56:20 2018
 @author: sgb
 """
 import re
-
+from datetime import datetime, date
 from Controller import Controller
-from UserSettings.APISettingsFactory import APISettingsFactory
+from UserSettings.AppSettingsFactory import AppSettingsFactory
 from Utilities.FileWriter import FileWriter
 from Utilities.FileReader import FileReader
 
 class UserInterface:
-    global c, fw, fr, asf
+    global c, fw, fr, asf, appSettings
     isHistoricalMode = False
     tickerInput = ''
-    fileInput = False
-    APISettings = ''
     
     def __init__(self):
         self.fw = FileWriter()
         self.fr = FileReader()
-        self.asf = APISettingsFactory()
+        self.asf = AppSettingsFactory()
     
-    def setHistoricalMode(self, isHistoricalMode):
-        if type(isHistoricalMode) is not bool:
-            raise Exception("Error: the isHistoricalMode arg must be boolean ('True' or 'False')")
-        self.isHistoricalMode = isHistoricalMode
+    def runApplication(self, userSettingsProfile, isHistoricalMode, referenceDate, ticker):
+        self.setAppSettings(userSettingsProfile, isHistoricalMode, referenceDate)
+        self.setTickerInput(ticker)
+        return self.handleRequest()
     
-    def setAPIs(self, userSettings, referenceDate):
+    def setAppSettings(self, userSettings, isHistoricalMode, referenceDate):
         if type(referenceDate) is not str:
             raise Exception("Error: the referenceDate arg must be a text string")
-        self.referenceDate = referenceDate
+        elif referenceDate == '':
+            referenceDate = datetime.strftime(date.today(), '%Y-%m-%d')
+        if type(isHistoricalMode) is not bool:
+            raise Exception("Error: the isHistoricalMode arg must be boolean ('True' or 'False')")
         if type(userSettings) is not str:
             raise Exception("Error: the desiredSettings arg must be a text string")
         
-        self.APISettings = self.asf.getAPISettings(userSettings, self.referenceDate)
+        self.referenceDate = referenceDate
+        self.isHistoricalMode = isHistoricalMode
+        self.appSettings = self.asf.getAppSettings(userSettings, self.referenceDate, self.isHistoricalMode)
     
-    def setTickerInput(self, tickerInput, justTickers = True):
+    def setTickerInput(self, tickerInput):
         if type(tickerInput) is not str:
             raise Exception("Error: the tickers arg must be a text string")
-        self.tickerInput = self.__handleTickerInput(tickerInput, justTickers)
+        self.tickerInput = tickerInput
     
     def handleRequest(self):
-        self.c = Controller(self.isHistoricalMode,
-                            self.APISettings,
-                            self.tickerInput)
+        self.c = Controller(self.isHistoricalMode, self.appSettings, self.tickerInput)
         stockData = self.c.callAPIs(self.tickerInput)
-        #TODO After this line, all calls should be user-settings specific,
-            #i.e. none of these calls should rely on Controller
-        self.c.identifyColNames(stockData)        
-        stockData = self.c.calcNewColumns(stockData)
-        stockData = self.c.deleteExtraCols(stockData)
+                
+        outputManager = self.appSettings.getOutputManager()
+        
+        outputManager.setHistoricalMode(self.isHistoricalMode)
+        outputManager.identifyColNames(stockData)        
+        stockData = outputManager.calcNewColumns(stockData)
+        stockData = outputManager.deleteExtraCols(stockData)
+        
         stockData['referenceDate'] = self.c.referenceDate
-        stockData = self.c.reindexColumns(stockData)
-        return self.c.renameColumns(stockData)
+        
+        stockData = outputManager.reindexColumns(stockData)
+        return outputManager.renameColumns(stockData)
     
-    def displayResults(self, dataFrame, fileName):
-        if self.fileInput == True:
-            self.fw.writeToFile(dataFrame, fileName)
-        else:
-            print(dataFrame.loc[0])
+    def printResults(self, dataFrame, fileName):
+        self.fw.writeToFile(dataFrame, fileName)
             
-    def __handleTickerInput(self, tickerInput, justTickers):
-        match = re.search('\\.[a-zA-Z]*$', tickerInput, flags = 0)
+    def readTickerInput(self, userInput):
+        match = re.search('\\.[a-zA-Z]*$', userInput, flags = 0)
         if match:
             if match.group(0) == '.xlsx' or match.group(0) == '.csv':
-                self.fileInput = True
-                if justTickers is True:
-                    output = self.fr.readExcel(tickerInput).iloc[:,0]
-                else:
-                    output = self.fr.readExcel(tickerInput).iloc[:,0:2]
+                output = self.fr.readExcel(userInput)
             else:
                 raise Exception('Currently only .xlsx and .csv files are supported.')
-        else:
-            output.append(tickerInput)
-        
         return output
