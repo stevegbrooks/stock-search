@@ -8,7 +8,7 @@ __pycache__/
 
 .DS_Store
 Secret.py
-GarethsAPIKeys.py
+APIKeys*.py
 *.xlsx
 *.csv
 *.txt
