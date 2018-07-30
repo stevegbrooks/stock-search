@@ -45,19 +45,25 @@ class IntrinioHistorical(StockAPICaller):
                   self.item, ' data from Intrinio for ' + ticker)
             histData.append(0)
         else:
-            total = 0
-            for i in jsonData:
-                total = total + i['value']
-            if self.item == 'volume':
-                histData.append(round(total/len(jsonData)))
+            if self.item == 'weightedavebasicsharesos':
+                histData.append(int(jsonData[0]['value']))
             else:
-                histData.append(round(total/len(jsonData), 2))
+                total = 0
+                for i in jsonData:
+                    total = total + i['value']
+                if self.item == 'volume':
+                    histData.append(round(total/len(jsonData)))
+                else:
+                    histData.append(round(total/len(jsonData), 2))
         
-        if self.end_date != self.start_date:        
-            colName = ['avg', self.item.capitalize(), '[', 
-                       self.end_date, ':',
-                       self.start_date, ']']
-            colName = ''.join(colName)
+        if self.end_date != self.start_date:
+            if self.item == 'weightedavebasicsharesos':
+                colName = 'outstandingShares'
+            else:
+                colName = ['avg', self.item.capitalize(), '[', 
+                           self.end_date, ':',
+                           self.start_date, ']']
+                colName = ''.join(colName)
         else:
             colName =  colName = [self.item, '[', 
                        self.end_date, ']']
