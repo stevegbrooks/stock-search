@@ -1,4 +1,20 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Takes in input from the UserInterface and builds the appropriate StockAPICaller
+objects. These objects then send the data requests from the user (see UserSettings) 
+to the APIs and returns the raw data.
+
+The controller sends this raw data back to the UserInterface/OutputManager classes
+for processing.
+
+Most important function here is 'validateDataRequest()', which makes sure that not only
+does the StockAPICaller object only recieve syntacitcally valid input, but also
+semantically valid input. Some of the semantic responsibilities are shared with the 
+UserSettings.AppSettings class, which is more specific to the user's needs.
+
+@author: sgb
+"""
 import pandas as pd
 from datetime import datetime
 from StockAPIFactory import StockAPIFactory as apiFactory
@@ -19,6 +35,11 @@ class Controller:
     settings = dict()
     
     def __init__(self, isHistoricalMode, appSettings, tickerInput):
+        """
+        The constructor takes in the historical mode bool, an AppSettings object,
+        and a ticker symbol. It then grabs the api specs based on whether
+        or not historical mode is true and passes it to the specifyAPI() method.
+        """
         self.stockAPICallers = dict()
         self.da = DateAdjuster()
         self.isHistoricalMode = isHistoricalMode
@@ -36,6 +57,11 @@ class Controller:
                             self.settings[i]['dataRequest']) 
         
     def specifyAPI(self, api, key, dataRequest):
+        """
+        Makes sure the api specs are formatted and specified properly with
+        'validateDataRequest()', and then retrieves the appropriate StockAPICaller 
+        objects from the factory.
+        """
         apiArgs = dict()
         apiArgs[api] = key
         dataRequest = self.validateDataRequest(api, dataRequest)
@@ -54,6 +80,14 @@ class Controller:
         return apiData
     
     def validateDataRequest(self, api, dataRequest):
+        """
+        Raises exceptions if there data requests are specified properly.
+        Allows for specifying the historical_data requests incompletely by having 
+        default behavior, i.e. it uses today as the end_date if end_date isn't specified.
+        
+        Adjusts dates based on day of week through the DateAdjuster class.
+        """
+        
         if 'endpoint' not in dataRequest:
             raise Exception('You must provide an endpoint!')
         elif 'item' not in dataRequest and api == 'intrinio':

@@ -1,4 +1,11 @@
-# -*- coding: utf-8 -*-
+"""
+Objects from this class are built when the user specifies 'gurufocus'.
+
+This class can only grab the company data summary right now.
+
+@author: sgb
+"""
+
 import pandas as pd
 import requests
 from StockAPICaller import StockAPICaller

@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jul 28 11:56:20 2018
+UserInterface is the layer between the Controller and the user. It does basic 
+checks on user input to make sure they are syntactically valid.
+
+It handles the raw data output from the Controller according to user specs - OutputManager - 
+and returns it to the user.
 
 @author: sgb
 """
@@ -23,11 +27,18 @@ class UserInterface:
         self.asf = AppSettingsFactory()
     
     def runApplication(self, userSettingsProfile, isHistoricalMode, referenceDate, ticker):
+        """
+        This is the method that the user interacts with directly to retrieve stock data.
+        """
         self.setAppSettings(userSettingsProfile, isHistoricalMode, referenceDate)
         self.setTickerInput(ticker)
         return self.handleRequest()
     
     def setAppSettings(self, userSettings, isHistoricalMode, referenceDate):
+        """
+        Sends parameters to the AppSettingsFactory and returns the appropriate 
+        AppSettings object.
+        """
         if type(referenceDate) is not str:
             raise Exception("Error: the referenceDate arg must be a text string")
         elif referenceDate == '':
@@ -49,11 +60,18 @@ class UserInterface:
         self.tickerInput = tickerInput
     
     def handleRequest(self):
+        """
+        Builds the Controller object, passes the relevant info, and calls the API with it.
+        
+        After that its cleaning the data based on UserSettings.OutputManager specs.
+        
+        It sets the referenceDate here outside of any other process to give the user feedback
+        for what they entered, because the dates get shifted based on specs and day of week.
+        """
         self.c = Controller(self.isHistoricalMode, self.appSettings, self.tickerInput)
         stockData = self.c.callAPIs(self.tickerInput)
                 
         outputManager = self.appSettings.getOutputManager()
-        
         outputManager.setHistoricalMode(self.isHistoricalMode)
         outputManager.identifyColNames(stockData)        
         stockData = outputManager.calcNewColumns(stockData)

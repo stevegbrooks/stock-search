@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jul 28 19:19:32 2018
+OutputManager takes the raw data from the Controller and cleans it up
+according to the user specs. Enter those specs here.
+
+The 'identifyColNames()' function is necessary because the APICallers will sometimes return metadata
+about the API call in the column name itself (if it is historical data and includes adjusted dates), so the identify function typically uses regex to pull these column names out so they can be refered to by the 
+other functions.
 
 @author: sgb
 """

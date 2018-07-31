@@ -1,3 +1,10 @@
+"""
+Objects from this class are built when the user specifies 'historical_data'
+as their endpoint.
+
+@author: sgb
+"""
+
 import pandas as pd
 import requests
 from StockAPICaller import StockAPICaller

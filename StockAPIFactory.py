@@ -1,3 +1,9 @@
+"""
+Builds the appropriate StockAPICallers based on input from the Controller.
+
+@author: sgb
+"""
+
 from GuruFocus import GuruFocus
 from IntrinioHistorical import IntrinioHistorical
 from Intrinio import Intrinio
