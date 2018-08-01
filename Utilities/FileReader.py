@@ -8,4 +8,8 @@ class FileReader:
         if 'dates' in df:
             if type(df['dates'][0]) is pd._libs.tslib.Timestamp:
                 df['dates'] = df['dates'].astype(str)
+        if 'tickers' in df:
+            if df['tickers'].dtype is not str:
+                df['tickers'] = df['tickers'].astype('str')
+                df['tickers'] = df['tickers'].str.upper()
         return df

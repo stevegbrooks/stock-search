@@ -17,10 +17,13 @@ class AppSettings():
     histModeSettings = dict()
     referenceDate = ''
     
-    def __init__(self, referenceDate):
+    def __init__(self, isHistoricalMode, referenceDate):
         self.referenceDate = referenceDate
         self.outputManger = OutputManager()
         self.apiKeys = APIKeys()
+        
+        if isHistoricalMode:
+            self.setHistorical()
         
     def setDefault(self):
         pass

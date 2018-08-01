@@ -7,6 +7,7 @@ Created on Sat Jul 28 14:25:04 2018
 """
 
 from UserSettings.AppSettings_Gareth import AppSettings_Gareth
+from UserSettings.AppSettings import AppSettings
 
 class AppSettingsFactory:
     
@@ -15,5 +16,7 @@ class AppSettingsFactory:
     def getAppSettings(self, desiredSettings, isHistoricalMode, referenceDate):
         if desiredSettings == 'garethsSettings':
             return AppSettings_Gareth(isHistoricalMode, referenceDate)
+        elif desiredSettings == 'test':
+            return AppSettings(isHistoricalMode, referenceDate)
         else:
             raise Exception('Settings file not found for ' + desiredSettings)
