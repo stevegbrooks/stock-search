@@ -16,3 +16,6 @@ class APIKeys():
     
     def getIntrinioKey(self):
         raise NotImplementedError("Please Implement this method")
+    
+    def getAlphaVantageKey(self):
+        raise NotImplementedError("Please Implement this method")

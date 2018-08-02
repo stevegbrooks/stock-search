@@ -43,6 +43,7 @@ class Controller:
         self.stockAPICallers = dict()
         self.da = DateAdjuster()
         self.isHistoricalMode = isHistoricalMode
+        
         if isHistoricalMode is True:
             self.settings = appSettings.getHistoricalSettings()
             self.referenceDate = self.settings.pop('referenceDate')
