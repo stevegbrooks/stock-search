@@ -3,7 +3,9 @@
 
 This package is meant to automate some of the tedium of doing research on stocks. The problem is that there isn't a one-stop shop for stock data. For many investors, the desired data points reside on multiple, often subscription-based, websites.
 
-Fortunately these websites often have APIs, like Gurufocus and Intrinio. This application is meant to bring multiple different APIs together into a single interface, so that one can simply specify data points and not have to worry about visiting different websites and cobbling the information together.
+Fortunately these websites often have APIs, like Gurufocus. Intrinio is a great API to use with this application as they are completely focused on their API product, and nothing else. 
+
+This application is meant to bring multiple different APIs together into a single interface, so that one can simply specify data points and not have to worry about visiting different websites and cobbling the information together.
 
 ## Dates and Historical Mode
 
@@ -24,6 +26,8 @@ Use this if you have multiple tickers. First put them into an .xlsx file, which 
 ## User Settings
 
 In order to use this program you'll need to have an account with an API. After you have an account and have your keys (or username and password), you can enter those credentials by building a subclass to `APIKeys`.
+
+You'll have to build out subclasses of `StockAPICaller` for each API that you want to use. See my examples of `Intrinio` and `GuruFocus`.
 
 You'll then have to enter your desired datapoints in a subclass of `AppSettings`, build out a subclass of `OutputManager`, and amend the `AppSettingsFactory` to accomdate your settings. 
 

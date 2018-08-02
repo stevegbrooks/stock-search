@@ -81,7 +81,7 @@ class Controller:
     
     def _validateDataRequest(self, api, dataRequest):
         """
-        Raises exceptions if there data requests are specified properly.
+        Raises exceptions if there data requests are specified improperly.
         Allows for specifying the historical_data requests incompletely by having 
         default behavior, i.e. it uses today as the end_date if end_date isn't specified.
         
