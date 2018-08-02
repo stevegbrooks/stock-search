@@ -1,12 +1,10 @@
+"""
+Template for any API that you want to implement
+
+@author: sgb
+"""
+
 class StockAPICaller():
-    credentials = ''
-    dataRequest = dict()
-    tickers = ''
     
-    def __init__(self, credentials, dataRequest):
-        self.credentials = credentials
-        self.dataRequest = dataRequest
-    
-    def getStockData(self, tickers):
-        self.tickers = tickers
-    
+    def getStockData(self):
+        raise NotImplementedError("Please Implement this method")

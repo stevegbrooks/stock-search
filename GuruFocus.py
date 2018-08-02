@@ -16,7 +16,6 @@ class GuruFocus(StockAPICaller):
     endpoint = ''
     
     def __init__(self, credentials, dataRequest):
-        super().__init__(credentials, dataRequest)
         self.credentials = credentials
         self.endpoint = dataRequest['endpoint']
         

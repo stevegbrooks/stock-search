@@ -8,36 +8,20 @@ and creates the OutputManager object for the user.
 
 @author: sgb
 """
-from UserSettings.APIKeys import APIKeys
-from UserSettings.OutputManager import OutputManager
 
 class AppSettings():
-    global outputManager, apiKeys
-    settings = dict()
-    histModeSettings = dict()
-    referenceDate = ''
     
-    def __init__(self, isHistoricalMode, referenceDate):
-        self.referenceDate = referenceDate
-        self.outputManger = OutputManager()
-        self.apiKeys = APIKeys()
-        
-        if isHistoricalMode:
-            self.setHistorical()
-        
     def setDefault(self):
-        pass
+        raise NotImplementedError("Please Implement this method")
     
     def setHistorical(self):
-        pass
-        
+        raise NotImplementedError("Please Implement this method")
+    
     def getDefaultSettings(self):
-        return self.settings
-        
+        raise NotImplementedError("Please Implement this method")
+    
     def getHistoricalSettings(self):
-        self.histModeSettings['referenceDate'] = self.referenceDate
-        return self.histModeSettings
+        raise NotImplementedError("Please Implement this method")
     
     def getOutputManager(self):
-        return self.outputManager
-    
+        raise NotImplementedError("Please Implement this method")

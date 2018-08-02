@@ -8,21 +8,11 @@ Created on Mon Jul  9 19:49:46 2018
 
 #holds the api keys/passwords
 
+
 class APIKeys():
     
-    gfKey = ''
-    intrinioUN = ''
-    intrinioPW = ''
-    intrinioKey = []
-    
-    def __init__(self):
-        self.gfKey = ''
-        self.intrinioUN = ''
-        self.intrinioPW = ''
-        self.intrinioKey = [self.intrinioUN, self.intrinioPW]
-    
     def getGFKey(self):
-        return self.gfKey
+        raise NotImplementedError("Please Implement this method")
     
     def getIntrinioKey(self):
-        return self.intrinioKey
+        raise NotImplementedError("Please Implement this method")

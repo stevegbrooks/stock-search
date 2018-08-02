@@ -9,14 +9,12 @@ import requests
 from StockAPICaller import StockAPICaller
 
 class Intrinio(StockAPICaller):
-    dataRequest = dict()
     credentials = ''
     baseURL = 'https://api.intrinio.com/'
     endpoint = 'data_point'
     item = ''
         
     def __init__(self, credentials, dataRequest):
-        super().__init__(credentials, dataRequest)
         self.credentials = credentials
         self.dataRequest = dataRequest
     

@@ -11,26 +11,19 @@ other functions.
 @author: sgb
 """
 
-class OutputManager:
-    global isHistoricalMode
+class OutputManager():
     
-    def __init__(self):
-        pass
+    def calcNewColumns(self):
+        raise NotImplementedError("Please Implement this method")
     
-    def calcNewColumns(self, dataFrame):
-        return dataFrame
+    def deleteExtraCols(self):
+        raise NotImplementedError("Please Implement this method")
     
-    def deleteExtraCols(self, dataFrame):
-        return dataFrame
+    def reindexColumns(self):
+        raise NotImplementedError("Please Implement this method")
     
-    def reindexColumns(self, dataFrame):
-        return dataFrame
+    def renameColumns(self):
+        raise NotImplementedError("Please Implement this method")
     
-    def renameColumns(self, dataFrame):
-        return dataFrame
-    
-    def identifyColNames(self, dataFrame):
-        pass
-    
-    def setHistoricalMode(self, isHistoricalMode):
-        self.isHistoricalMode = isHistoricalMode
+    def identifyColNames(self):
+        raise NotImplementedError("Please Implement this method")

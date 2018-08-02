@@ -52,11 +52,11 @@ class Controller:
         self.tickerInput = tickerInput
         
         for i in self.settings:
-            self.specifyAPI(self.settings[i]['api'], 
+            self._specifyAPI(self.settings[i]['api'], 
                             self.settings[i]['key'], 
                             self.settings[i]['dataRequest']) 
         
-    def specifyAPI(self, api, key, dataRequest):
+    def _specifyAPI(self, api, key, dataRequest):
         """
         Makes sure the api specs are formatted and specified properly with
         'validateDataRequest()', and then retrieves the appropriate StockAPICaller 
@@ -64,7 +64,7 @@ class Controller:
         """
         apiArgs = dict()
         apiArgs[api] = key
-        dataRequest = self.validateDataRequest(api, dataRequest)
+        dataRequest = self._validateDataRequest(api, dataRequest)
         self.stockAPICallers[len(self.stockAPICallers)] = apiFactory.getAPI(apiFactory, 
                              apiArgs, dataRequest)
     
@@ -79,7 +79,7 @@ class Controller:
                     apiData = results
         return apiData
     
-    def validateDataRequest(self, api, dataRequest):
+    def _validateDataRequest(self, api, dataRequest):
         """
         Raises exceptions if there data requests are specified properly.
         Allows for specifying the historical_data requests incompletely by having 

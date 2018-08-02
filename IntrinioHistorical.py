@@ -10,7 +10,6 @@ import requests
 from StockAPICaller import StockAPICaller
 
 class IntrinioHistorical(StockAPICaller):
-    dataRequest = dict()
     credentials = ''
     item = ''
     end_date = ''
@@ -20,7 +19,6 @@ class IntrinioHistorical(StockAPICaller):
     endpoint = 'historical_data'    
         
     def __init__(self, credentials, dataRequest):
-        super().__init__(credentials, dataRequest)
         self.credentials = credentials
         self.dataRequest = dataRequest
         
