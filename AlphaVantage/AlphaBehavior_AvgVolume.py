@@ -20,12 +20,12 @@ class AlphaBehavior_AvgVolume(AlphaBehavior):
         alphaData = super().getStockData(baseURL, endpoint, ticker, 
                          outputSize, credentials, end_date, start_date)
         
-        if len(alphaData < 1):
+        if len(alphaData) < 1:
             avgVolume.append(0)
         
         totalVol = 0
-        for i in alphaData:
-            totalVol = totalVol + int(alphaData[i]['5. volume'])
+        for key in alphaData.keys():
+            totalVol = totalVol + int(alphaData[key]['5. volume'])
         
         avgVolume.append(round(totalVol/len(alphaData)))
         

@@ -19,7 +19,7 @@ class AlphaBehavior_MovingAvg(AlphaBehavior):
         alphaData = super().getStockData(baseURL, endpoint, ticker, 
                          outputSize, credentials, end_date, start_date)
         
-        if len(alphaData < 1):
+        if len(alphaData) < 1:
             pass
         
         for i in alphaData:

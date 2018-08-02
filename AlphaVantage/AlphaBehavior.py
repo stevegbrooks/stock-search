@@ -17,9 +17,9 @@ class AlphaBehavior:
     def getStockData(self, baseURL, endpoint, ticker, outputSize, 
                      credentials, end_date, start_date):
         
-        sequence = (self.baseURL, self.endpoint, '&symbol=', ticker, 
-                    '&outputsize=', self.outputSize,
-                    '&apikey=', self.credentials)
+        sequence = (baseURL, endpoint, '&symbol=', ticker, 
+                    '&outputsize=', outputSize,
+                    '&apikey=', credentials)
         url = ''.join(map(str, sequence))
         response = requests.get(url)
         
@@ -27,27 +27,23 @@ class AlphaBehavior:
             errorMessage = 'Check your AlphaVantage API key, or URL address' 
             raise Exception(errorMessage)
             
-        timeSeries = list(response.json().values())[1]
+        timeSeries = response.json()[list(response.json().keys())[1]]
         values = list(timeSeries.values())
          
-        endDateAsDate = self.da.convertToDate(self.end_date)
-        startDateAsDate = self.da.convertToDate(self.start_date)
+        endDateAsDate = self.da.convertToDate(end_date)
+        startDateAsDate = self.da.convertToDate(start_date)
         
-        output = []
-       
-        if len(self.timeSeries) < 1:
+        data = dict()
+        if len(timeSeries) < 1:
             print('Unable to retrieve company data from AlphaVantage for ' + ticker)
         else:
-            data = dict()
             if end_date == start_date:
                 for index, date in enumerate(map(self.da.convertToDate, timeSeries.keys())):
                     if date <= endDateAsDate and date >= endDateAsDate - timedelta(days = 20):
                         data[date] = values[index]
-                        output = sorted(data.values())
             else:
                 for index, date in enumerate(map(self.da.convertToDate, timeSeries.keys())):
                     if date <= endDateAsDate and date >= startDateAsDate:
                         data[date] = values[index]
-                        output = sorted(data.values())
         
-        return output
+        return data
