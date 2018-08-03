@@ -26,7 +26,7 @@ class AlphaVantage(StockAPICaller):
         elif self.item == 'summary':
             self._behavior = AlphaBehavior_Summary()
         elif self.item == 'movingavg':
-            self._behavior == AlphaBehavior_MovingAvg()
+            self._behavior = AlphaBehavior_MovingAvg()
 
     
     def getStockData(self, ticker):

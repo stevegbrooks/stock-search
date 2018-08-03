@@ -4,10 +4,9 @@ Builds the appropriate StockAPICallers based on input from the Controller.
 @author: sgb
 """
 
-from GuruFocus import GuruFocus
-from IntrinioHistorical import IntrinioHistorical
-from Intrinio import Intrinio
 from AlphaVantage.AlphaVantage import AlphaVantage
+from GuruFocus.GuruFocus import GuruFocus
+from Intrinio.Intrinio import Intrinio
 
 class StockAPIFactory:
     
@@ -19,12 +18,8 @@ class StockAPIFactory:
             return GuruFocus(credentials = apiArgs.get('gurufocus'), 
                              dataRequest = dataRequest)
         elif apiArgs.__contains__('intrinio'):
-            if dataRequest['endpoint'] == 'historical_data':
-                return IntrinioHistorical(credentials = apiArgs.get('intrinio'), 
-                                          dataRequest = dataRequest)
-            elif dataRequest['endpoint'] == 'data_point':
-                return Intrinio(credentials = apiArgs.get('intrinio'), 
-                                dataRequest = dataRequest)
+            return Intrinio(credentials = apiArgs.get('intrinio'),
+                            dataRequest = dataRequest)
         elif apiArgs.__contains__('alphavantage'):
             return AlphaVantage(credentials = apiArgs.get('alphavantage'), 
                                 dataRequest = dataRequest)

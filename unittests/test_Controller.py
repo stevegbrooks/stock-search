@@ -14,13 +14,13 @@ class TestController:
     @pytest.fixture(scope = "function")
     def intrinio_dataPoint1(cls):
         c = Controller(isHistoricalMode = False,
-                       appSettings = ,
+                       #appSettings = ,
                        tickerInput = "AAPL")
         api1 = 'intrinio'
         api2 = 'gurufocus'
-        dataRequest1 = {'endpoint' = 'data_point',
-                        'item' = }
+        dataRequest1 = {'endpoint' : 'data_point',
+                        'item' : 'close_price'}
     
-    def test__validateDataRequest1():
+#    def test__validateDataRequest1():
         
         

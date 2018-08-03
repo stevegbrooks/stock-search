@@ -94,34 +94,33 @@ class Controller:
         elif 'item' not in dataRequest and api == 'intrinio':
             raise Exception('You must provide an item when you call the Intrinio API!')
         else:
-            if dataRequest['endpoint'] == 'historical_data':
-                if 'start_date' in dataRequest and 'end_date' not in dataRequest:
-                    raise Exception('If you provide a start_date,' + 
-                                    ' then you must also provide an end_date!')
-                elif 'end_date' in dataRequest and 'start_date' not in dataRequest:
+            if 'start_date' in dataRequest and 'end_date' not in dataRequest:
+                raise Exception('If you provide a start_date,' + 
+                                ' then you must also provide an end_date!')
+            elif 'end_date' in dataRequest and 'start_date' not in dataRequest:
+                dataRequest['end_date'] = self.da.adjustDate(
+                        dataRequest['end_date'], 
+                        dataRequest['item']
+                        )
+                dataRequest['start_date'] = self.da.defineStartDate(dataRequest['end_date'])
+            elif 'end_date' not in dataRequest and 'start_date' not in dataRequest:
+                dataRequest['end_date'] = self.da.defineEndDate(dataRequest['item'])
+                dataRequest['start_date'] = self.da.defineStartDate(dataRequest['end_date'])
+            elif 'end_date' in dataRequest and 'start_date' in dataRequest:
+                if dataRequest['end_date'] == dataRequest['start_date']:
                     dataRequest['end_date'] = self.da.adjustDate(
                             dataRequest['end_date'], 
-                            dataRequest['item']
-                            )
-                    dataRequest['start_date'] = self.da.defineStartDate(dataRequest['end_date'])
-                elif 'end_date' not in dataRequest and 'start_date' not in dataRequest:
-                    dataRequest['end_date'] = self.da.defineEndDate(dataRequest['item'])
-                    dataRequest['start_date'] = self.da.defineStartDate(dataRequest['end_date'])
-                elif 'end_date' in dataRequest and 'start_date' in dataRequest:
-                    if dataRequest['end_date'] == dataRequest['start_date']:
-                        dataRequest['end_date'] = self.da.adjustDate(
-                                dataRequest['end_date'], 
-                                'pointVolume')
-                        dataRequest['start_date'] = self.da.adjustDate(
-                                dataRequest['start_date'], 
-                                'pointVolume')
-                    else:
-                        dataRequest['end_date'] = self.da.adjustDate(
-                                dataRequest['end_date'], 
-                                dataRequest['item'])
-                        dataRequest['start_date'] = self.da.adjustDate(
-                                dataRequest['start_date'], 
-                                dataRequest['item'])
+                            'pointVolume')
+                    dataRequest['start_date'] = self.da.adjustDate(
+                            dataRequest['start_date'], 
+                            'pointVolume')
+                else:
+                    dataRequest['end_date'] = self.da.adjustDate(
+                            dataRequest['end_date'], 
+                            dataRequest['item'])
+                    dataRequest['start_date'] = self.da.adjustDate(
+                            dataRequest['start_date'], 
+                            dataRequest['item'])
             elif dataRequest['endpoint'] == 'data_point':
                 if 'end_date' in dataRequest or 'start_date' in dataRequest:
                     raise Exception("The 'data_point' endpoint does not take in dates" + 
