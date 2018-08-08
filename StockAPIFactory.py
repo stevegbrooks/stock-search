@@ -7,10 +7,9 @@ Builds the appropriate StockAPICallers based on input from the Controller.
 from AlphaVantage.AlphaVantage import AlphaVantage
 from GuruFocus.GuruFocus import GuruFocus
 from Intrinio.Intrinio import Intrinio
+from Zacks.Zacks import Zacks
 
 class StockAPIFactory:
-    
-    apiArgs = dict()
     
     def getAPI(self, apiArgs, dataRequest):
         
@@ -23,8 +22,11 @@ class StockAPIFactory:
         elif apiArgs.__contains__('alphavantage'):
             return AlphaVantage(credentials = apiArgs.get('alphavantage'), 
                                 dataRequest = dataRequest)
-        
+        elif apiArgs.__contains__('zacks'):
+            return Zacks(dataRequest = dataRequest)
         else:
-            raise Exception('Currently only Intrinio, AlphaVantage, and GuruFocus APIs are supported.')
+            raise Exception('Currently only ' + 
+                            'Intrinio, AlphaVantage, GuruFocus, and Zacks ' +
+                            'APIs are supported.')
 
     

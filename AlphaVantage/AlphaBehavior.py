@@ -26,8 +26,11 @@ class AlphaBehavior:
         if response.status_code != 200: 
             errorMessage = 'Check your AlphaVantage API key, or URL address' 
             raise Exception(errorMessage)
-            
-        timeSeries = response.json()[list(response.json().keys())[1]]
+        
+        for key in response.json():
+            if key != 'Meta Data':
+                timeSeries = response.json()[key]
+                
         values = list(timeSeries.values())
          
         endDateAsDate = self.da.convertToDate(end_date)
@@ -39,7 +42,7 @@ class AlphaBehavior:
         else:
             if end_date == start_date:
                 for index, date in enumerate(map(self.da.convertToDate, timeSeries.keys())):
-                    if date <= endDateAsDate and date >= endDateAsDate - timedelta(days = 20):
+                    if date <= endDateAsDate and date >= endDateAsDate - timedelta(days = 28):
                         data[date] = values[index]
             else:
                 for index, date in enumerate(map(self.da.convertToDate, timeSeries.keys())):

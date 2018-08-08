@@ -16,7 +16,7 @@ from UserInterface import UserInterface
 
 ui = UserInterface()
         
-tickers = ui.readTickerInput('tickers.xlsx')
+tickers = ui.readTickerInput('__InputFiles/tickers.xlsx')
 
 stockData = pd.DataFrame()
 for index, row in tickers.iterrows():
@@ -26,4 +26,4 @@ for index, row in tickers.iterrows():
                                ticker = row['tickers'])
     stockData = stockData.append(output, ignore_index = True)
 
-ui.printResults(stockData, 'results.xlsx')
+ui.printResults(stockData)

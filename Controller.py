@@ -50,6 +50,7 @@ class Controller:
         else:
             self.settings = appSettings.getDefaultSettings()
             self.referenceDate = self.da.adjustDate(datetime.today(), 'referenceDate')
+        
         self.tickerInput = tickerInput
         
         for i in self.settings:

@@ -2,8 +2,8 @@ import pandas as pd
 
 class FileReader:
     
-    def readExcel(self, excelFileName):
-        df = pd.read_excel(excelFileName, sheet_name='Sheet1')
+    def readExcel(self, excelFileName, sheetNameOrNum = 0):
+        df = pd.read_excel(excelFileName, sheet_name = sheetNameOrNum, na_values = '--')
         df = df.fillna('')
         if 'dates' in df:
             if type(df['dates'][0]) is pd._libs.tslib.Timestamp:
