@@ -10,20 +10,22 @@ historical mode is set to 'True'.
 
 @author: sgb
 """
-
+import time
 import pandas as pd
 from UserInterface import UserInterface
 
 ui = UserInterface()
         
-tickers = ui.readTickerInput('__InputFiles/tickers.xlsx')
+tickers = ui.readTickerInput('tickers.xlsx')
+
+isHistoricalMode = True
 
 stockData = pd.DataFrame()
 for index, row in tickers.iterrows():
-    output = ui.runApplication(isHistoricalMode = True, 
+    if isHistoricalMode == True: time.sleep(15)
+    output = ui.runApplication(isHistoricalMode = isHistoricalMode, 
                                userSettingsProfile = 'garethsSettings', 
                                referenceDate = row['dates'], 
                                ticker = row['tickers'])
     stockData = stockData.append(output, ignore_index = True)
-
 ui.printResults(stockData)

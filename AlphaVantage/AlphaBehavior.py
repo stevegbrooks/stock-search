@@ -30,7 +30,8 @@ class AlphaBehavior:
         for key in response.json():
             if key != 'Meta Data':
                 timeSeries = response.json()[key]
-                
+        if type(timeSeries) is str:
+        	raise Exception('calling alphaVantage too quickly, slow your roll bro')   
         values = list(timeSeries.values())
          
         endDateAsDate = self.da.convertToDate(end_date)

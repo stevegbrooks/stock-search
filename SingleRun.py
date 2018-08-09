@@ -9,7 +9,7 @@ from UserInterface import UserInterface
 ui = UserInterface()
 
 stockData = ui.runApplication(isHistoricalMode = True, 
-                               userSettingsProfile = 'garethsSettings2', 
+                               userSettingsProfile = 'garethsSettings', 
                                referenceDate = '2017-02-17', 
                                ticker = 'TRUE')
 

@@ -83,10 +83,7 @@ class UserInterface:
         return outputManager.renameColumns(stockData)
     
     def printResults(self, dataFrame):
-        if self.isHistoricalMode == True:
-            self.fw.writeToFile(dataFrame, '__OutputFiles/historicalResults.xlsx')
-        else:
-            self.fw.writeToFile(dataFrame, '__OutputFiles/results.xlsx')
+        self.fw.writeToFile(dataFrame, 'results.xlsx')
             
     def readTickerInput(self, userInput):
         match = re.search('\\.[a-zA-Z]*$', userInput, flags = 0)

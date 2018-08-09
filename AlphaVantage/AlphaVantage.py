@@ -7,7 +7,7 @@ Created on Thu Aug  2 10:54:35 2018
 """
 from StockAPICaller import StockAPICaller
 from AlphaVantage.AlphaBehavior_AvgVolume import AlphaBehavior_AvgVolume
-from AlphaVantage.AlphaBehavior_PriceOutcome import AlphaBehavior_PriceOutcome
+from AlphaVantage.AlphaBehavior_20DayAvg import AlphaBehavior_20DayAvg
 from AlphaVantage.AlphaBehavior_Summary import AlphaBehavior_Summary
 
 class AlphaVantage(StockAPICaller):
@@ -26,7 +26,7 @@ class AlphaVantage(StockAPICaller):
         elif self.item == 'summary':
             self._behavior = AlphaBehavior_Summary()
         elif self.item == 'priceOutcome':
-            self._behavior = AlphaBehavior_PriceOutcome()
+            self._behavior = AlphaBehavior_20DayAvg()
 
     def getStockData(self, ticker):
         return self._behavior.getStockData(self.baseURL, self.endpoint,

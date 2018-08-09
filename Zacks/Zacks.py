@@ -34,9 +34,10 @@ class Zacks(StockAPICaller):
             estimate.append(0)
             reported.append(0)
         else:
-            surprise.append(rowOfInterest['%Surp'])
-            surprise.append(rowOfInterest['Estimate'])
-            surprise.append(rowOfInterest['Reported'])
+            index = rowOfInterest.index.tolist()[0]
+            surprise.append(rowOfInterest['%Surp'][index])
+            estimate.append(rowOfInterest['Estimate'][index])
+            reported.append(rowOfInterest['Reported'][index])
 
         if self.fileName == 'Earnings.xlsx':
             output = pd.DataFrame({'ticker' : ticker, '%Surp_E' : surprise,
