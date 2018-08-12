@@ -17,9 +17,7 @@ from Utilities.FileWriter import FileWriter
 from Utilities.FileReader import FileReader
 
 class UserInterface:
-    global c, fw, fr, asf, appSettings
     isHistoricalMode = False
-    tickerInput = ''
     
     def __init__(self):
         self.fw = FileWriter()
@@ -73,14 +71,14 @@ class UserInterface:
                 
         outputManager = self.appSettings.getOutputManager()
         outputManager.setHistoricalMode(self.isHistoricalMode)
+        
         outputManager.identifyColNames(stockData)        
         stockData = outputManager.calcNewColumns(stockData)
         stockData = outputManager.deleteExtraCols(stockData)
-        
         stockData['referenceDate'] = self.c.referenceDate
-        
         stockData = outputManager.reindexColumns(stockData)
-        return outputManager.renameColumns(stockData)
+        stockData = outputManager.renameColumns(stockData)
+        return stockData
     
     def printResults(self, dataFrame):
         self.fw.writeToFile(dataFrame, 'results.xlsx')

@@ -25,7 +25,7 @@ class IntrinioBehavior_Current(IntrinioBehavior):
         if intrinioData == 'na':
             print('Unable to retrieve ' + endpoint + ': ', item, 
                   ' data from Intrinio for ' + ticker)
-            output.append(0)
+            output.append(float('nan'))
         else:
             if item == 'weightedavebasicsharesos':
                 output.append(int(intrinioData))

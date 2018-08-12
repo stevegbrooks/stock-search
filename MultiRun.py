@@ -10,22 +10,25 @@ historical mode is set to 'True'.
 
 @author: sgb
 """
-import time
 import pandas as pd
 from UserInterface import UserInterface
 
 ui = UserInterface()
         
 tickers = ui.readTickerInput('tickers.xlsx')
+isHistoricalMode = False
 
-isHistoricalMode = True
-
+####DONT CHANGE ANYTHING BELOW THIS LINE
 stockData = pd.DataFrame()
+print("Starting program...")
 for index, row in tickers.iterrows():
-    if isHistoricalMode == True: time.sleep(15)
     output = ui.runApplication(isHistoricalMode = isHistoricalMode, 
                                userSettingsProfile = 'garethsSettings', 
                                referenceDate = row['dates'], 
                                ticker = row['tickers'])
     stockData = stockData.append(output, ignore_index = True)
+    if index+1 < len(tickers):
+        print("{}% complete...".format(round((index+1)/len(tickers)*100)))
+    else:
+        print("Program finished")
 ui.printResults(stockData)

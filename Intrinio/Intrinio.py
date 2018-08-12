@@ -4,6 +4,7 @@
 
 from StockAPICaller import StockAPICaller
 from Intrinio.IntrinioBehavior_Historical import IntrinioBehavior_Historical
+from Intrinio.IntrinioBehavior_20DayAvg import IntrinioBehavior_20DayAvg
 from Intrinio.IntrinioBehavior_Current import IntrinioBehavior_Current
 
 class Intrinio(StockAPICaller):
@@ -17,7 +18,10 @@ class Intrinio(StockAPICaller):
         self.item = dataRequest['item']
         
         if self.endpoint == 'historical_data':
-            self._behavior = IntrinioBehavior_Historical()
+            if self.item == '20DayAvg':
+                self._behavior = IntrinioBehavior_20DayAvg()
+            else:
+                self._behavior = IntrinioBehavior_Historical()
         elif self.endpoint == 'data_point':
             self._behavior = IntrinioBehavior_Current()
     

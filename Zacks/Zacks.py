@@ -30,9 +30,9 @@ class Zacks(StockAPICaller):
         
         if len(rowOfInterest) == 0:
             print('Unable to retrieve data from ' + self.fileName + ' for ' + ticker)
-            surprise.append(0)
-            estimate.append(0)
-            reported.append(0)
+            surprise.append(float('nan'))
+            estimate.append(float('nan'))
+            reported.append(float('nan'))
         else:
             index = rowOfInterest.index.tolist()[0]
             surprise.append(rowOfInterest['%Surp'][index])

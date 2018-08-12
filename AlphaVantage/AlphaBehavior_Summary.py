@@ -27,9 +27,9 @@ class AlphaBehavior_Summary(AlphaBehavior):
         secondKey = list(alphaData.keys())[1]
         
         if len(alphaData) < 1:
-            lastVolume.append(0)
-            lastPrice.append(0)
-            percentChange.append(0)
+            lastVolume.append(float('nan'))
+            lastPrice.append(float('nan'))
+            percentChange.append(float('nan'))
         else:
             lastVolume.append(int(float(alphaData[firstKey]['5. volume'])))
             lastPrice.append(float(alphaData[firstKey]['4. close']))

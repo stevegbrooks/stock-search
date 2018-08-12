@@ -21,7 +21,7 @@ class AlphaBehavior_AvgVolume(AlphaBehavior):
                          outputSize, credentials, end_date, start_date)
         
         if len(alphaData) < 1:
-            avgVolume.append(0)
+            avgVolume.append(float('nan'))
         
         totalVol = 0
         for key in alphaData.keys():

@@ -25,10 +25,10 @@ class GuruBehavior_Summary(GuruBehavior):
         if len(guruData) <= 2:
             print('Unable to retrieve company data from GuruFocus for ' + ticker)
             companyName.append('')
-            lastVolume.append(0)
-            lastPrice.append(0)
-            percentChange.append(0)
-            outstandingShares.append(0)
+            lastVolume.append(float('nan'))
+            lastPrice.append(float('nan'))
+            percentChange.append(float('nan'))
+            outstandingShares.append(float('nan'))
         else:
             companyName.append(guruData['0'])
             lastVolume.append(int(float(guruData['volumn_day_total'])))

@@ -22,7 +22,7 @@ class AlphaBehavior_20DayAvg(AlphaBehavior):
         alphaData = super().getStockData(baseURL, endpoint, ticker, 
                          outputSize, credentials, end_date, start_date)
         
-        output = pd.DataFrame(columns = ['tickers', 'movingAvg'])
+        output = pd.DataFrame()
         if len(alphaData) > 0:
             close_price = []
             date = []

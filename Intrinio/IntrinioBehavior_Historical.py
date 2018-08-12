@@ -21,7 +21,7 @@ class IntrinioBehavior_Historical(IntrinioBehavior):
         output = []
         
         if len(intrinioData) == 0:
-            output.append(0)
+            output.append(float('nan'))
         else:
             if item == 'weightedavebasicsharesos':
                 output.append(int(intrinioData[0]['value']))
