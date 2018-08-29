@@ -12,15 +12,29 @@ historical mode is set to 'True'.
 """
 import pandas as pd
 from UserInterface import UserInterface
+from WebCrawler import WebCrawler
 
 ui = UserInterface()
-        
 tickers = ui.readTickerInput('tickers.xlsx')
 isHistoricalMode = False
 
-####DONT CHANGE ANYTHING BELOW THIS LINE
-stockData = pd.DataFrame()
+#################################################
+#################################################
+#################################################
+#################################################
+#################################################
+###DO NOT TOUCH ANYTHING BETWEEN THESE BLOCKS!!##
+
 print("Starting program...")
+
+if isHistoricalMode == False:
+    wc = WebCrawler()
+    wc.setDriverPath('/Users/sgb/Desktop/Stuff/Python/StockAPICaller/chromedriver')
+    wc.createDriver()
+    wc.briefingLogin(['garethb787@gmail.com', 'Massivecat22'])
+
+stockData = pd.DataFrame()
+
 for index, row in tickers.iterrows():
     output = ui.runApplication(isHistoricalMode = isHistoricalMode, 
                                userSettingsProfile = 'garethsSettings', 
@@ -31,4 +45,16 @@ for index, row in tickers.iterrows():
         print("{}% complete...".format(round((index+1)/len(tickers)*100)))
     else:
         print("Program finished")
+        
 ui.printResults(stockData)
+
+###DO NOT TOUCH ANYTHING BETWEEN THESE BLOCKS!!##
+#################################################
+#################################################
+#################################################
+#################################################
+#################################################
+
+if isHistoricalMode == False:
+    wc.briefingLogout() #highlight and run just this line if the program halts midway through due before trying again
+    wc.killDriver()

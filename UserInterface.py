@@ -66,8 +66,8 @@ class UserInterface:
         It sets the referenceDate here outside of any other process to give the user feedback
         for what they entered, because the dates get shifted based on specs and day of week.
         """
-        self.c = Controller(self.isHistoricalMode, self.appSettings, self.tickerInput)
-        stockData = self.c.callAPIs(self.tickerInput)
+        c = Controller(self.isHistoricalMode, self.appSettings, self.tickerInput)
+        stockData = c.callAPIs(self.tickerInput)
                 
         outputManager = self.appSettings.getOutputManager()
         outputManager.setHistoricalMode(self.isHistoricalMode)
@@ -75,7 +75,7 @@ class UserInterface:
         outputManager.identifyColNames(stockData)        
         stockData = outputManager.calcNewColumns(stockData)
         stockData = outputManager.deleteExtraCols(stockData)
-        stockData['referenceDate'] = self.c.referenceDate
+        stockData['referenceDate'] = c.referenceDate
         stockData = outputManager.reindexColumns(stockData)
         stockData = outputManager.renameColumns(stockData)
         return stockData
@@ -84,6 +84,7 @@ class UserInterface:
         self.fw.writeToFile(dataFrame, 'results.xlsx')
             
     def readTickerInput(self, userInput):
+        output = userInput
         match = re.search('\\.[a-zA-Z]*$', userInput, flags = 0)
         if match:
             if match.group(0) == '.xlsx' or match.group(0) == '.csv':
