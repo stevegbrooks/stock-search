@@ -7,7 +7,7 @@ Use SingleRun when you just want to return a single company's data to the consol
 from UserInterface import UserInterface
 from WebCrawler import WebCrawler
 
-ticker = 'FB'
+ticker = 'WSC'
 referenceDate = '2017-02-17'
 isHistoricalMode = False
 settings = 'garethsSettings'
