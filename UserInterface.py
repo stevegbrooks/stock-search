@@ -15,6 +15,7 @@ from Controller import Controller
 from UserSettings.AppSettingsFactory import AppSettingsFactory
 from Utilities.FileWriter import FileWriter
 from Utilities.FileReader import FileReader
+from Utilities.DateAdjuster import DateAdjuster
 
 class UserInterface:
     isHistoricalMode = False
@@ -23,6 +24,7 @@ class UserInterface:
         self.fw = FileWriter()
         self.fr = FileReader()
         self.asf = AppSettingsFactory()
+        self.da = DateAdjuster()
     
     def runApplication(self, userSettingsProfile, isHistoricalMode, referenceDate, ticker):
         """
@@ -75,7 +77,7 @@ class UserInterface:
         outputManager.identifyColNames(stockData)        
         stockData = outputManager.calcNewColumns(stockData)
         stockData = outputManager.deleteExtraCols(stockData)
-        stockData['referenceDate'] = c.referenceDate
+        stockData['referenceDate'] = self.da.convertToDate(c.referenceDate)
         stockData = outputManager.reindexColumns(stockData)
         stockData = outputManager.renameColumns(stockData)
         return stockData

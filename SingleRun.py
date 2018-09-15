@@ -9,7 +9,7 @@ from WebCrawler import WebCrawler
 
 ticker = 'FB'
 referenceDate = '2017-02-17'
-isHistoricalMode = True
+isHistoricalMode = False
 settings = 'garethsSettings'
 
 #################################################
@@ -18,6 +18,7 @@ settings = 'garethsSettings'
 #################################################
 #################################################
 ###DO NOT TOUCH ANYTHING BELOW THIS LINE!!#######
+
 if isHistoricalMode == False:
     wc = WebCrawler()
     wc.setDriverPath('/Users/sgb/Desktop/Stuff/Python/StockAPICaller/chromedriver')

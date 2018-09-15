@@ -7,12 +7,14 @@ as their endpoint and '20DayAvg' as their item.
 
 import pandas as pd
 from Intrinio.IntrinioBehavior import IntrinioBehavior
+from Utilities.DateAdjuster import DateAdjuster
 
 class IntrinioBehavior_20DayAvg(IntrinioBehavior):
     
     def __init__(self):
         super().__init__()
         self.item = 'close_price'
+        self.da = DateAdjuster()
         
     def getStockData(self, baseURL, endpoint, ticker, credentials, item,
                      end_date, start_date):
@@ -33,11 +35,12 @@ class IntrinioBehavior_20DayAvg(IntrinioBehavior):
         else:
             for i in reversed(intrinioData):
                 close_price.append(float(i['value']))
-                date.append(i['date'])
+                date.append(self.da.convertToDate(i['date']))
+            
             output = pd.DataFrame({'ticker' : ticker,
                                    'close_price' : close_price,
                                    '20Day_Avg_EndDate' : date})
-            
+    
             output['20Day_Avg'] = output['close_price'].rolling(20, min_periods = 1).mean()
             
             output = pd.DataFrame(output[['ticker', 

@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from Briefing.BriefingBehavior import BriefingBehavior
 from Utilities.DateAdjuster import DateAdjuster
 
-class BriefingBehavior_Earnings(BriefingBehavior):
+class BriefingBehavior_Earnings2(BriefingBehavior):
     
     def __init__(self):
         super().__init__()
@@ -32,30 +32,30 @@ class BriefingBehavior_Earnings(BriefingBehavior):
         if len(hasTable) is 0:
             table = pd.read_html(str(divs[0].table))[0]
             
-            if len(table) <= 4:
+            if len(table) <= 5:
                 priorYear_S = float('nan')
             else:
-                priorYear_S = float(table.iloc[4,16])
+                priorYear_S = float(table.iloc[5,16])
             
-            if table.iloc[0,20] != table.iloc[0,20]:
+            if table.iloc[1,20] != table.iloc[1,20]:
                 y2YRev = float('nan')
             else:
-                y2YRev = float(re.sub('\\s|%', '', table.iloc[0,20]))/100
+                y2YRev = float(re.sub('\\s|%', '', table.iloc[1,20]))/100
                 
-            if table.iloc[0,0] != table.iloc[0,0]:
+            if table.iloc[1,0] != table.iloc[1,0]:
                 date = ''
             else:
-                date = self.da.convertToDate(table.iloc[0,0], 
+                date = self.da.convertToDate(table.iloc[1,0], 
                                              dateStringFormat = '%d-%b-%y')
                 
             table = pd.DataFrame(data = {'ticker' : self.ticker,
                                          'Date' : date,
                                          'Year2YearRev' : y2YRev,
-                                         'Estimate_E' : table.iloc[0,12],
-                                         'Actual_E' : table.iloc[0,10],
-                                         'Estimate_S' : table.iloc[0,18],
-                                         'Actual_S' : table.iloc[0,16],
-                                         'PriorYear_E' : table.iloc[0,14],
+                                         'Estimate_E' : table.iloc[1,12],
+                                         'Actual_E' : table.iloc[1,10],
+                                         'Estimate_S' : table.iloc[1,18],
+                                         'Actual_S' : table.iloc[1,16],
+                                         'PriorYear_E' : table.iloc[1,14],
                                          'PriorYear_S' : priorYear_S}, index = [0])
         else:
             table = pd.DataFrame(data = {'ticker' : self.ticker,

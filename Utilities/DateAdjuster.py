@@ -38,14 +38,13 @@ class DateAdjuster:
     def defineEndDate(self, item):
         end_date = date.today()
         return self.adjustDate(end_date, item)
-        
     
-    def convertToDate(self, dateString):
+    def convertToDate(self, dateString, dateStringFormat = '%Y-%m-%d'):
         try:
-            date = datetime.strptime(dateString, '%Y-%m-%d')
+            date = datetime.strptime(dateString, dateStringFormat)
             return date
         except ValueError:
-            print(dateString + ' is in an unrecognized date format' + '\n')
+            print(dateString + ' is in an unrecognized date format. \n Was expecting ' + dateStringFormat)
     
            
         

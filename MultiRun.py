@@ -58,3 +58,4 @@ ui.printResults(stockData)
 if isHistoricalMode == False:
     wc.briefingLogout() #highlight and run just this line if the program halts midway through due before trying again
     wc.killDriver()
+    

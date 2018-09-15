@@ -10,7 +10,7 @@ class FileWriter:
         self.fr = FileReader()
         
     def __writeToExcel(self, dataFrame, fileName):
-        writer = pd.ExcelWriter((fileName), engine = 'xlsxwriter')
+        writer = pd.ExcelWriter((fileName), engine = 'xlsxwriter', datetime_format = 'mm/dd/yyyy')
         dataFrame.to_excel(writer, 'Sheet1', index = False)
         writer.save()
     
