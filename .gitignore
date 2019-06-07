@@ -7,7 +7,6 @@ __pycache__/
 *.so
 
 .DS_Store
-Secret.py
 UserSettings/APIKeys_*.py
 UserSettings/AppSettings_*.py
 UserSettings/OutputManager_*.py

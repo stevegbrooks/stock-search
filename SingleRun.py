@@ -21,9 +21,9 @@ settings = 'garethsSettings'
 
 if isHistoricalMode == False:
     wc = WebCrawler()
-    wc.setDriverPath('/Users/sgb/Desktop/Stuff/Python/StockAPICaller/chromedriver')
+    wc.setDriverPath('/usr/local/bin/chromedriver')
     wc.createDriver()
-    wc.briefingLogin(['garethb787@gmail.com', 'Massivecat22'])
+    wc.briefingLogin(['', ''])
 
 ui = UserInterface()
 
