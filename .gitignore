@@ -19,6 +19,8 @@ UserSettings/OutputManager_*.py
 *.csv
 *.txt
 
+!tickers.xlsx
+
 # Distribution / packaging
 .Python
 build/
