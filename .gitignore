@@ -21,6 +21,9 @@ UserSettings/OutputManager_*.py
 
 !tickers.xlsx
 
+.idea/
+
+
 # Distribution / packaging
 .Python
 build/
