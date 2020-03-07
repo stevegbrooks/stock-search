@@ -22,7 +22,7 @@ UserSettings/OutputManager_*.py
 !tickers.xlsx
 
 .idea/
-
+.vscode
 
 # Distribution / packaging
 .Python

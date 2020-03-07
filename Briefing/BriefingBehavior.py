@@ -18,7 +18,7 @@ class BriefingBehavior:
         url = ''.join(map(str, sequence))
         
         wc = WebCrawler()
-        
+
         if wc.connectToURL(url):
             sleep(2)
             html = wc.getDriver().page_source

@@ -30,7 +30,7 @@ class WebCrawler:
                     )
         
         def connectToURL(self, url):
-#            self.driver.get_screenshot_as_file('__screenshots/beforeTry.png')
+#           self.driver.get_screenshot_as_file("__screenshots/beforeTry.png")
             connectionAttempts = 0
             while connectionAttempts < 3:
                 try:
@@ -40,7 +40,7 @@ class WebCrawler:
                         EC.presence_of_element_located((By.ID, 'content'))
                     )
                     return True
-                except Exception as ex:
+                except Exception:
                     connectionAttempts += 1
                     print(f'Error connecting to {url}')
                     print(f'Attempt #{connectionAttempts}')

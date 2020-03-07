@@ -8,7 +8,6 @@ Created on Mon Aug 27 21:22:08 2018
 
 from StockAPICaller import StockAPICaller
 from Briefing.BriefingBehavior_Earnings import BriefingBehavior_Earnings
-from Briefing.BriefingBehavior_Earnings2 import BriefingBehavior_Earnings2
 
 class Briefing(StockAPICaller):
     baseURL = 'https://www.briefing.com/InPlayEq/Search/ticker.htm?ticker='
@@ -19,7 +18,7 @@ class Briefing(StockAPICaller):
         self.item = dataRequest['item']
 
         if self.endpoint == 'earnings':
-            self._behavior = BriefingBehavior_Earnings2()
+            self._behavior = BriefingBehavior_Earnings()
         else:
             raise NotImplementedError("Please implement this behavior")
     
