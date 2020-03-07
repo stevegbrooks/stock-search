@@ -1,5 +1,5 @@
 
-# StockAPICaller
+# stock-search
 
 This package is meant to automate some of the tedium of doing research on stocks. The problem is that there isn't a one-stop shop for stock data. For many investors, the desired data points reside on multiple, often subscription-based, websites.
 
