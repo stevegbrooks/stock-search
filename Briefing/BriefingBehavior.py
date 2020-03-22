@@ -18,11 +18,17 @@ class BriefingBehavior:
         url = ''.join(map(str, sequence))
         
         wc = WebCrawler()
+        wc.setDriverPath('chromedriver')
+        wc.createDriver()
+        wc.briefingLogin([credentials[0], credentials[1]])
 
         if wc.connectToURL(url):
             sleep(2)
             html = wc.getDriver().page_source
         else:
-            print('Error connecting to Briefing')
+            raise Exception('Unable to connect to Briefing.com')
+        
+        wc.briefingLogout()
+        wc.killDriver()
         
         return html

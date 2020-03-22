@@ -82,7 +82,7 @@ class UserInterface:
         stockData = outputManager.renameColumns(stockData)
         return stockData
     
-    def printResults(self, dataFrame):
+    def printToFile(self, dataFrame):
         self.fw.writeToFile(dataFrame, 'results.xlsx')
             
     def readTickerInput(self, userInput):

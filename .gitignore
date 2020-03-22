@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+*.png
+
 chromedriver
 
 .DS_Store

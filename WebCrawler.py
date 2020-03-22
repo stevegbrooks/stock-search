@@ -59,6 +59,9 @@ class WebCrawler:
         def getDriver(self):
             return self.driver
         
+        def getScreenshot(self):
+            return self.driver.get_screenshot_as_file('screenshot.png')
+        
         def briefingLogout(self):
             self.driver.get('https://www.briefing.com/Login/Logout.aspx')
             

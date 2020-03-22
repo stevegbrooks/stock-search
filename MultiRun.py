@@ -16,46 +16,26 @@ from WebCrawler import WebCrawler
 
 ui = UserInterface()
 tickers = ui.readTickerInput('tickers.xlsx')
-isHistoricalMode = False
-
-#################################################
-#################################################
-#################################################
-#################################################
-#################################################
-###DO NOT TOUCH ANYTHING BETWEEN THESE BLOCKS!!##
+isHistoricalMode = True
 
 print("Starting program...")
 
-if isHistoricalMode == False:
-    wc = WebCrawler()
-    wc.setDriverPath('/usr/local/bin/chromedriver')
-    wc.createDriver()
-    wc.briefingLogin(['', ''])
-
 stockData = pd.DataFrame()
 
-for index, row in tickers.iterrows():
-    output = ui.runApplication(isHistoricalMode = isHistoricalMode, 
-                               userSettingsProfile = 'test', 
-                               referenceDate = row['dates'], 
-                               ticker = row['tickers'])
-    stockData = stockData.append(output, ignore_index = True)
-    if index+1 < len(tickers):
-        print("{}% complete...".format(round((index+1)/len(tickers)*100)))
-    else:
-        print("Program finished")
-        
-ui.printResults(stockData)
+try:
+    for index, row in tickers.iterrows():
+        output = ui.runApplication(isHistoricalMode = isHistoricalMode, 
+                                userSettingsProfile = 'garethsSettings', 
+                                referenceDate = row['dates'], 
+                                ticker = row['tickers'])
+        stockData = stockData.append(output, ignore_index = True)
+        if index+1 < len(tickers):
+            print("{}% complete...".format(round((index+1)/len(tickers)*100)))
+        else:
+            print("Program finished")
+            
+    ui.printToFile(stockData)
 
-###DO NOT TOUCH ANYTHING BETWEEN THESE BLOCKS!!##
-#################################################
-#################################################
-#################################################
-#################################################
-#################################################
-
-if isHistoricalMode == False:
-    wc.briefingLogout() #highlight and run just this line if the program halts midway through due before trying again
-    wc.killDriver()
+except Exception as e:
+    print(f'Error: {e}')
     

@@ -39,7 +39,6 @@ class IntrinioBehavior:
             data = response.json()['value']
         
         if (type(data) == str and data == 'na') or len(data) < 1:
-            print('Unable to retrieve ' + endpoint + ': ', item, 
-                  ' data from Intrinio for ' + ticker)
+            print('Unable to retrieve data from ' + url)
         
         return data
