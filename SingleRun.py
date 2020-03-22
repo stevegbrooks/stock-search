@@ -9,8 +9,8 @@ from WebCrawler import WebCrawler
 
 ticker = 'WSC'
 referenceDate = '2017-02-17'
-isHistoricalMode = False
-settings = 'garethsSettings'
+isHistoricalMode = True
+settings = 'testSettings'
 
 #################################################
 #################################################

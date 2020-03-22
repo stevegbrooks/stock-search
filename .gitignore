@@ -13,10 +13,6 @@ UserSettings/APIKeys_*.py
 UserSettings/AppSettings_*.py
 UserSettings/OutputManager_*.py
 
-!UserSettings/APIKeys_Test.py
-!UserSettings/AppSettings_Test.py
-!UserSettings/OutputManager_Test.py
-
 *.xlsx
 *.csv
 *.txt
