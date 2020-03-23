@@ -15,6 +15,7 @@ UserSettings.AppSettings class, which is more specific to the user's needs.
 
 @author: sgb
 """
+
 import pandas as pd
 from datetime import datetime
 from StockAPIFactory import StockAPIFactory as apiFactory
@@ -73,12 +74,12 @@ class Controller:
     def callAPIs(self, tickerInput):
         apiData = pd.DataFrame()
         for caller in self.stockAPICallers:
-                results = self.stockAPICallers[caller].getStockData(tickerInput)
-                if len(apiData) != 0:
-                    apiData = pd.merge(apiData, 
-                                       results, on = 'ticker', how = 'left')
-                else:
-                    apiData = results
+            results = self.stockAPICallers[caller].getStockData(tickerInput)
+            if len(apiData) != 0:
+                apiData = pd.merge(apiData, 
+                                    results, on = 'ticker', how = 'left')
+            else:
+                apiData = results
         return apiData
     
     def _validateDataRequest(self, api, dataRequest):
